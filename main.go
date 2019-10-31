@@ -20,10 +20,8 @@ import (
 func main() {
 	start := time.Now()
 
-	var sheet Sheet
-	sheet.init()
-
-	flag.String("f", "", "filename to load")
+	// set up command line arguments
+	flag.String("f", "allincidents.csv", "filename to load")
 	flag.Int("m", -1, "month to retrieve")
 	flag.Int("y", -1, "year to retrieve")
 	flag.String("c", "Austria", "Country to retrieve")
@@ -35,6 +33,7 @@ func main() {
 		log.Fatalf("Error parsing commandline options: %v", err)
 	}
 
+	// get the command line arguments
 	filename := viper.GetString("f")
 	country := viper.GetString("c")
 	month := viper.GetInt("m")
@@ -45,9 +44,12 @@ func main() {
 
 	log.Printf("Loaded a total of %d incidents from %s\n", len(incidents), filename)
 
+	// reduce incidents
 	incidents = filterByCountry(incidents, country)
 	incidents = filterOutProdCategories(incidents, getProdCategoriesToExclude())
 
+	var sheet Sheet
+	sheet.init()
 	sheet.setupExcelFile()
 
 	if month == -1 || year == -1 {
@@ -85,27 +87,27 @@ func readFile(filename string) []Incident {
 		var inc = Incident{
 			Country:      parts[0],
 			ID:           parts[4],
-			Description:  parts[14],
-			Resolution:   parts[15],
-			ProdCategory: parts[9],
-			Service:      parts[10],
-			ServiceCI:    parts[11],
-			BusinessArea: parts[12],
+			Description:  parts[13],
+			Resolution:   parts[14],
+			ProdCategory: parts[8],
+			Service:      parts[9],
+			ServiceCI:    parts[10],
+			BusinessArea: parts[11],
 		}
 
 		// get timestamps, createdAt and solvedAt
 		// solvedAt may not be filled in (yet), if so, don't use it for SLA calculations
-		t, err := parseTimeStamp(parts[3])
+		t, err := parseTimeStamp(parts[5])
 		if err == nil {
 			inc.CreatedAt = t
 		}
-		t, err = parseTimeStamp(parts[4])
+		t, err = parseTimeStamp(parts[6])
 		if err == nil {
 			inc.SolvedAt = t
 			inc.SLAReady = true
 		}
 
-		switch parts[6] {
+		switch parts[7] {
 		case "Critical":
 			inc.Priority = Critical
 		case "High":
@@ -197,6 +199,9 @@ func getProdCategoriesToExclude() []string {
 		"Idefix",
 		"Timecop",
 		"Optical Transport",
+		"Bumblebee",
+		"Finanzarchiv AT",
+		"HR",
 	}
 	return filterCategories
 }
