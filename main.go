@@ -26,6 +26,7 @@ func main() {
 	flag.Int("y", -1, "year to retrieve")
 	flag.String("c", "Austria", "Country to retrieve")
 	flag.String("x", "out.xlsx", "Excel file to write")
+	flag.Bool("g", false, "use gui")
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
 	err := viper.BindPFlags(pflag.CommandLine)
@@ -33,39 +34,44 @@ func main() {
 		log.Fatalf("Error parsing commandline options: %v", err)
 	}
 
-	// get the command line arguments
-	filename := viper.GetString("f")
-	country := viper.GetString("c")
-	month := viper.GetInt("m")
-	year := viper.GetInt("y")
-	xlsFilename := viper.GetString("x")
+	if viper.GetBool("g") {
+		RunGui()
+	} else {
 
-	incidents := readFile(filename)
+		// get the command line arguments
+		filename := viper.GetString("f")
+		country := viper.GetString("c")
+		month := viper.GetInt("m")
+		year := viper.GetInt("y")
+		xlsFilename := viper.GetString("x")
 
-	log.Printf("Loaded a total of %d incidents from %s\n", len(incidents), filename)
+		incidents := readFile(filename)
 
-	// reduce incidents
-	incidents = filterByCountry(incidents, country)
-	incidents = filterOutProdCategories(incidents, getProdCategoriesToExclude())
+		log.Printf("Loaded a total of %d incidents from %s\n", len(incidents), filename)
 
-	var sheet Sheet
-	sheet.init()
-	sheet.setupExcelFile()
+		// reduce incidents
+		incidents = filterByCountry(incidents, country)
+		incidents = filterOutProdCategories(incidents, getProdCategoriesToExclude())
 
-	if month == -1 || year == -1 {
-		month = int(time.Now().Month())
-		year = time.Now().Year()
-		month, year = getPreviousMonth(month, year)
+		var sheet Sheet
+		sheet.init()
+		sheet.setupExcelFile()
+
+		if month == -1 || year == -1 {
+			month = int(time.Now().Month())
+			year = time.Now().Year()
+			month, year = getPreviousMonth(month, year)
+		}
+
+		reportOnSixMonths(incidents, month, year, &sheet)
+		sheet.createCharts()
+
+		err = sheet.SaveAs(xlsFilename)
+		if err != nil {
+			log.Fatalf("Error saving excel file: %v", err)
+		}
+		log.Printf("Wrote output to %s", xlsFilename)
 	}
-
-	reportOnSixMonths(incidents, month, year, &sheet)
-	sheet.createCharts()
-
-	err = sheet.SaveAs(xlsFilename)
-	if err != nil {
-		log.Fatalf("Error saving excel file: %v", err)
-	}
-	log.Printf("Wrote output to %s", xlsFilename)
 	log.Printf("Total running time: %s\n", time.Since(start))
 }
 
