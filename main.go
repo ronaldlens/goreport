@@ -2,10 +2,8 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/spf13/viper"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
@@ -73,49 +71,6 @@ func main() {
 	log.Printf("Total running time: %s\n", time.Since(start))
 }
 
-func checkSLA(incident *Incident) bool {
-	// only process if the incident is solved
-	if !incident.SLAReady {
-		return false
-	}
-	switch incident.Priority {
-	case Critical:
-		return checkSLAHours(incident, 4)
-	case High:
-		return checkSLAHours(incident, 8)
-	case Medium:
-		return checkSLABusinessDays(incident, 1)
-	case Low:
-		return checkSLABusinessDays(incident, 3)
-	}
-	return false
-}
-
-func checkSLAHours(incident *Incident, hours int) bool {
-	duration, _ := time.ParseDuration(fmt.Sprintf("%dh", hours))
-	target := incident.CreatedAt.Add(duration)
-	return target.After(incident.SolvedAt)
-}
-
-func checkSLABusinessDays(incident *Incident, days int) bool {
-	// get time at start of day at CreatedAt
-	t := incident.CreatedAt
-	targetTime := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
-	oneDay, _ := time.ParseDuration("24h")
-	for days >= 0 {
-		targetTime = targetTime.Add(oneDay)
-		if isWeekDay(targetTime) {
-			days--
-		}
-	}
-
-	return targetTime.After(incident.SolvedAt)
-}
-
-func isWeekDay(moment time.Time) bool {
-	return moment.Weekday() != time.Saturday && moment.Weekday() != time.Sunday
-}
-
 func getProdCategoriesToExclude() []string {
 	filterCategories := []string{
 		"HFC Network",
@@ -134,50 +89,6 @@ func getProdCategoriesToExclude() []string {
 		"HR",
 	}
 	return filterCategories
-}
-
-func filterOutProdCategories(incidents []Incident, categories []string) []Incident {
-	var result []Incident
-OuterLoop:
-	for _, incident := range incidents {
-		for _, category := range categories {
-			if strings.Contains(incident.ProdCategory, category) {
-				continue OuterLoop
-			}
-		}
-		result = append(result, incident)
-	}
-	return result
-}
-
-func filterByCountry(incidents []Incident, country string) []Incident {
-	var result []Incident
-	for _, incident := range incidents {
-		if strings.Contains(incident.Country, country) {
-			result = append(result, incident)
-		}
-	}
-	return result
-}
-
-func filterByMonthYear(incidents []Incident, month int, year int) []Incident {
-	var result []Incident
-	for _, incident := range incidents {
-		if int(incident.CreatedAt.Month()) == month && incident.CreatedAt.Year() == year {
-			result = append(result, incident)
-		}
-	}
-	return result
-}
-
-func filterByPriority(incidents []Incident, priority int) []Incident {
-	var result []Incident
-	for _, incident := range incidents {
-		if incident.Priority == priority {
-			result = append(result, incident)
-		}
-	}
-	return result
 }
 
 func getPreviousMonth(month int, year int) (int, int) {
@@ -229,31 +140,4 @@ func reportOnSixMonths(incidents []Incident, month int, year int, sheet *Sheet) 
 	}
 	sheet.addProdCategoriesToSheet(sixMonthIncidents)
 	sheet.addIncidentsToSheet(sixMonthIncidents)
-}
-
-func collectProdCategories(incidents []Incident) map[string]ProdCategory {
-	prodCategories := make(map[string]ProdCategory)
-	for _, incident := range incidents {
-		category, found := prodCategories[incident.ProdCategory]
-		if !found {
-			category = ProdCategory{}
-			prodCategories[incident.ProdCategory] = category
-		}
-		category.Total++
-		if incident.SLAMet {
-			category.SLAMet++
-		}
-		switch incident.Priority {
-		case Critical:
-			category.Critical++
-		case High:
-			category.High++
-		case Medium:
-			category.Medium++
-		case Low:
-			category.Low++
-		}
-		prodCategories[incident.ProdCategory] = category
-	}
-	return prodCategories
 }

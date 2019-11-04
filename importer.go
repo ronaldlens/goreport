@@ -35,13 +35,13 @@ func importIncidents(filename string) ([]Incident, error) {
 		parts := strings.Split(scanner.Text(), "\t")
 		var inc = Incident{
 			Country:      parts[headers["Country"]],
-			ID:           parts[4],
-			Description:  parts[13],
-			Resolution:   parts[14],
-			ProdCategory: parts[8],
-			Service:      parts[9],
-			ServiceCI:    parts[10],
-			BusinessArea: parts[11],
+			ID:           parts[headers["Incident Number"]],
+			Description:  parts[headers["Description"]],
+			Resolution:   parts[headers["Resolution Description"]],
+			ProdCategory: parts[headers["Product Categorization Tier2"]],
+			Service:      parts[headers["Service"]],
+			ServiceCI:    parts[headers["Service CI"]],
+			BusinessArea: parts[headers["Business area"]],
 		}
 
 		switch parts[headers["Priority"]] {
@@ -57,11 +57,11 @@ func importIncidents(filename string) ([]Incident, error) {
 
 		// get timestamps, createdAt and solvedAt
 		// solvedAt may not be filled in (yet), if so, don't use it for SLA calculations
-		t, err := parseTimeStamp(parts[5])
+		t, err := parseTimeStamp(parts[headers["Create DateTime"]])
 		if err == nil {
 			inc.CreatedAt = t
 		}
-		t, err = parseTimeStamp(parts[6])
+		t, err = parseTimeStamp(parts[headers["Last Resolved DateTime"]])
 		if err == nil {
 			inc.SolvedAt = t
 			inc.SLAReady = true
