@@ -1,17 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"github.com/spf13/viper"
 	"log"
-	"os"
 	"strings"
 	"time"
-
-	"golang.org/x/text/encoding/unicode"
-	"golang.org/x/text/transform"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/spf13/pflag"
@@ -45,7 +40,10 @@ func main() {
 		year := viper.GetInt("y")
 		xlsFilename := viper.GetString("x")
 
-		incidents := readFile(filename)
+		incidents, err := importIncidents(filename)
+		if err != nil {
+			log.Fatalf("Error importing %s: %v", filename, err)
+		}
 
 		log.Printf("Loaded a total of %d incidents from %s\n", len(incidents), filename)
 
@@ -73,80 +71,6 @@ func main() {
 		log.Printf("Wrote output to %s", xlsFilename)
 	}
 	log.Printf("Total running time: %s\n", time.Since(start))
-}
-
-func readFile(filename string) []Incident {
-	file, err := os.Open(filename)
-	if err != nil {
-		log.Fatalf("Trying to open %s: %v", filename, err)
-	}
-
-	scanner := bufio.NewScanner(transform.NewReader(
-		file, unicode.UTF16(unicode.LittleEndian, unicode.UseBOM).NewDecoder()))
-
-	// skip the firsl line, header
-	scanner.Scan()
-
-	var incidents []Incident
-	for scanner.Scan() {
-		parts := strings.Split(scanner.Text(), "\t")
-		var inc = Incident{
-			Country:      parts[0],
-			ID:           parts[4],
-			Description:  parts[13],
-			Resolution:   parts[14],
-			ProdCategory: parts[8],
-			Service:      parts[9],
-			ServiceCI:    parts[10],
-			BusinessArea: parts[11],
-		}
-
-		// get timestamps, createdAt and solvedAt
-		// solvedAt may not be filled in (yet), if so, don't use it for SLA calculations
-		t, err := parseTimeStamp(parts[5])
-		if err == nil {
-			inc.CreatedAt = t
-		}
-		t, err = parseTimeStamp(parts[6])
-		if err == nil {
-			inc.SolvedAt = t
-			inc.SLAReady = true
-		}
-
-		switch parts[7] {
-		case "Critical":
-			inc.Priority = Critical
-		case "High":
-			inc.Priority = High
-		case "Medium":
-			inc.Priority = Medium
-		case "Low":
-			inc.Priority = Low
-		}
-
-		// calculate the open time in minutes
-		// check if the SLA is met
-		if inc.SLAReady {
-			inc.OpenTime = int(inc.SolvedAt.Sub(inc.CreatedAt).Minutes())
-		} else {
-			inc.OpenTime = 0
-		}
-		inc.SLAMet = checkSLA(&inc)
-
-		incidents = append(incidents, inc)
-	}
-	err = file.Close()
-	if err != nil {
-		log.Fatalf("Error closing file %s: %v", filename, err)
-	}
-	return incidents
-}
-
-func parseTimeStamp(ts string) (time.Time, error) {
-	ts = strings.Replace(ts, " ", "T", 1) // Make it RFC3339 compliant
-	ts = strings.Replace(ts, "/", "-", 2) // fix the date part
-	ts += "Z"                             // add the Z for UTC
-	return time.Parse(time.RFC3339, ts)
 }
 
 func checkSLA(incident *Incident) bool {
