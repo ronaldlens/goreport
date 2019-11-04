@@ -78,7 +78,7 @@ func getProdCategoriesToExclude() []string {
 		"ACS/TR069 vDSL",
 		"Field Force Management",
 		"Monitoring",
-		"Docsis",
+		"DOCSIS",
 		"Radio",
 		"International Voice Unit",
 		"Idefix",
