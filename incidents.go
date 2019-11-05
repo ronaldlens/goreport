@@ -1,6 +1,9 @@
 package main
 
-import "strings"
+import (
+	"github.com/360EntSecGroup-Skylar/excelize"
+	"strings"
+)
 
 func filterOutProdCategories(incidents []Incident, categories []string) []Incident {
 	var result []Incident
@@ -71,4 +74,66 @@ func collectProdCategories(incidents []Incident) map[string]ProdCategory {
 		prodCategories[incident.ProdCategory] = category
 	}
 	return prodCategories
+}
+
+func getProdCategoriesToExclude() []string {
+	filterCategories := []string{
+		"HFC Network",
+		"GIS Systems",
+		"ACS/TR069 vDSL",
+		"Field Force Management",
+		"Monitoring",
+		"DOCSIS",
+		"Radio",
+		"International Voice Unit",
+		"Idefix",
+		"Timecop",
+		"Optical Transport",
+		"Bumblebee",
+		"Finanzarchiv AT",
+		"HR",
+	}
+	return filterCategories
+}
+
+func reportOnSixMonths(incidents []Incident, month int, year int, sheet *Sheet) {
+	xls := sheet.file
+	percentStyle, _ := xls.NewStyle(`{"number_format": 9}`)
+	var sixMonthIncidents []Incident
+	// do it for 5 months
+	for i := 6; i > 0; i-- {
+		monthIncidents := filterByMonthYear(incidents, month, year)
+		sixMonthIncidents = append(sixMonthIncidents, monthIncidents...)
+		monthName := monthIncidents[1].CreatedAt.UTC().Format("Jan")
+		axis, _ := excelize.CoordinatesToCellName(2+i, 3)
+		_ = xls.SetCellStr("Overview", axis, monthName)
+		axis, _ = excelize.CoordinatesToCellName(2+i, 10)
+		_ = xls.SetCellStr("Overview", axis, monthName)
+		axis, _ = excelize.CoordinatesToCellName(2+i, 17)
+		_ = xls.SetCellStr("Overview", axis, monthName)
+		for priorityIndex, priority := range []int{Critical, High, Medium, Low} {
+			priorityIncidents := filterByPriority(monthIncidents, priority)
+			total := 0
+			slaMet := 0
+			for _, incident := range priorityIncidents {
+				if incident.SLAReady {
+					total++
+					if incident.SLAMet {
+						slaMet++
+					}
+				}
+			}
+			percentage := float64(slaMet) / float64(total)
+			axis, _ = excelize.CoordinatesToCellName(2+i, 4+priorityIndex)
+			_ = xls.SetCellInt("Overview", axis, total)
+			axis, _ = excelize.CoordinatesToCellName(2+i, 11+priorityIndex)
+			_ = xls.SetCellInt("Overview", axis, slaMet)
+			axis, _ = excelize.CoordinatesToCellName(2+i, 18+priorityIndex)
+			_ = xls.SetCellFloat("Overview", axis, percentage, 2, 32)
+			_ = xls.SetCellStyle("Overview", axis, axis, percentStyle)
+		}
+		month, year = getPreviousMonth(month, year)
+	}
+	sheet.addProdCategoriesToSheet(sixMonthIncidents)
+	sheet.addIncidentsToSheet(sixMonthIncidents)
 }
