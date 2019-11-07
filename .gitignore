@@ -2,3 +2,4 @@
 goreport
 *.xlsx
 .idea/
+*.yaml

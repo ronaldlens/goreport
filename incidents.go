@@ -137,3 +137,12 @@ func reportOnSixMonths(incidents []Incident, month int, year int, sheet *Sheet) 
 	sheet.addProdCategoriesToSheet(sixMonthIncidents)
 	sheet.addIncidentsToSheet(sixMonthIncidents)
 }
+
+func getPreviousMonth(month int, year int) (int, int) {
+	month--
+	if month == 0 {
+		month = 12
+		year--
+	}
+	return month, year
+}
