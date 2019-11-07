@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"strings"
 
 	"log"
@@ -56,6 +57,18 @@ func main() {
 	incidents = filterByCountry(incidents, country)
 	incidents = filterOutProdCategories(incidents, getProdCategoriesToExclude())
 
+	runReport(incidents, country, month, year, outputFilename, verbose)
+
+	if verbose {
+		log.Printf("Total running time: %s\n", time.Since(start))
+	}
+}
+
+func runReport(incidents []Incident, country string, month int, year int, outputFilename string, verbose bool) {
+	if outputFilename == "" {
+		outputFilename = fmt.Sprintf("report-%s-%02d-%d.xlsx", strings.ToLower(country), month, year)
+	}
+
 	var sheet Sheet
 	sheet.init()
 	sheet.setupExcelFile()
@@ -66,22 +79,46 @@ func main() {
 		month, year = getPreviousMonth(month, year)
 	}
 
-	if outputFilename == "" {
-		outputFilename = fmt.Sprintf("report-%s-%02d-%d.xlsx", strings.ToLower(country), month, year)
-	}
 	reportOnSixMonths(incidents, month, year, &sheet)
 	sheet.createCharts()
 
-	err = sheet.SaveAs(outputFilename)
+	err := sheet.SaveAs(outputFilename)
 	if err != nil {
 		log.Fatalf("Error saving excel file: %v", err)
 	}
 	if verbose {
 		log.Printf("Wrote output to %s", outputFilename)
-		log.Printf("Total running time: %s\n", time.Since(start))
 	}
+
 }
 
-func runReport() {
+func hasCommand(command string) bool {
+	// check is enough args
+	if len(os.Args) < 2 {
+		return false
+	}
+
+	// check if arg is an option
+	if strings.HasPrefix(os.Args[1], "-") {
+		return false
+	}
+
+	// check if command is given
+	return os.Args[1] == command
+}
+
+func hasNoun(noun string) bool {
+	// check is enough args
+	if len(os.Args) < 3 {
+		return false
+	}
+
+	// check if arg is an option
+	if strings.HasPrefix(os.Args[2], "-") {
+		return false
+	}
+
+	// check if command is given
+	return os.Args[2] == noun
 
 }
