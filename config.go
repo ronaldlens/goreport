@@ -3,6 +3,7 @@ package main
 import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"log"
 )
 
 type SLA struct {
@@ -35,4 +36,14 @@ func readConfig(filename string) (Config, error) {
 	}
 	//fmt.Printf("read config:\n%v\n", config)
 	return config, nil
+}
+
+func getCountryFromConfig(config Config, countryName string) Country {
+	for _, country := range config.Countries {
+		if country.Name == countryName {
+			return country
+		}
+	}
+	log.Fatalf("Cannot find country %s in configuration", countryName)
+	return Country{}
 }

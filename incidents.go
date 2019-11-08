@@ -76,26 +76,6 @@ func collectProdCategories(incidents []Incident) map[string]ProdCategory {
 	return prodCategories
 }
 
-func getProdCategoriesToExclude() []string {
-	filterCategories := []string{
-		"HFC Network",
-		"GIS Systems",
-		"ACS/TR069 vDSL",
-		"Field Force Management",
-		"Monitoring",
-		"DOCSIS",
-		"Radio",
-		"International Voice Unit",
-		"Idefix",
-		"Timecop",
-		"Optical Transport",
-		"Bumblebee",
-		"Finanzarchiv AT",
-		"HR",
-	}
-	return filterCategories
-}
-
 func reportOnSixMonths(incidents []Incident, month int, year int, sheet *Sheet) {
 	xls := sheet.file
 	percentStyle, _ := xls.NewStyle(`{"number_format": 9}`)

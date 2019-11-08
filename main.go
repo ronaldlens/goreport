@@ -75,7 +75,10 @@ func main() {
 	} else if hasCommand("report") {
 		// reduce incidents
 		incidents = filterByCountry(incidents, country)
-		incidents = filterOutProdCategories(incidents, getProdCategoriesToExclude())
+
+		countryConfig := getCountryFromConfig(config, country)
+
+		incidents = filterOutProdCategories(incidents, countryConfig.FilterOutCategories)
 
 		runReport(incidents, country, month, year, outputFilename, verbose)
 	}
@@ -86,6 +89,12 @@ func main() {
 }
 
 func runReport(incidents []Incident, country string, month int, year int, outputFilename string, verbose bool) {
+	if month == -1 || year == -1 {
+		month = int(time.Now().Month())
+		year = time.Now().Year()
+		month, year = getPreviousMonth(month, year)
+	}
+
 	if outputFilename == "" {
 		outputFilename = fmt.Sprintf("report-%s-%02d-%d.xlsx", strings.ToLower(country), month, year)
 	}
@@ -93,12 +102,6 @@ func runReport(incidents []Incident, country string, month int, year int, output
 	var sheet Sheet
 	sheet.init()
 	sheet.setupExcelFile()
-
-	if month == -1 || year == -1 {
-		month = int(time.Now().Month())
-		year = time.Now().Year()
-		month, year = getPreviousMonth(month, year)
-	}
 
 	reportOnSixMonths(incidents, month, year, &sheet)
 	sheet.createCharts()
