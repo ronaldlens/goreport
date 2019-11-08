@@ -3,25 +3,22 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
 	"strings"
 
 	"log"
 	"time"
 )
 
-func main() {
-	start := time.Now()
+// set up command line arguments
+var configFilename string
+var inputFilename string
+var outputFilename string
+var country string
+var month int
+var year int
+var verbose bool
 
-	// set up command line arguments
-	var configFilename string
-	var inputFilename string
-	var outputFilename string
-	var country string
-	var month int
-	var year int
-	var verbose bool
-
+func init() {
 	flag.StringVar(&configFilename, "cfg", "goreport.yaml", "Configuration filename")
 	flag.StringVar(&inputFilename, "input", "allincidents.csv", "Tab delimited incident input filename")
 	flag.StringVar(&outputFilename, "output", "", "Output filename to use for xlsx file")
@@ -31,6 +28,11 @@ func main() {
 	flag.IntVar(&year, "year", -1, "Year to report on")
 
 	flag.BoolVar(&verbose, "v", false, "Increased verbosity")
+
+}
+
+func main() {
+	start := time.Now()
 
 	flag.Parse()
 
@@ -53,11 +55,30 @@ func main() {
 		log.Printf("Loaded a total of %d incidents from %s\n", len(incidents), inputFilename)
 	}
 
-	// reduce incidents
-	incidents = filterByCountry(incidents, country)
-	incidents = filterOutProdCategories(incidents, getProdCategoriesToExclude())
+	// work through commands
+	if hasCommand("list") {
+		if hasNoun("countries") {
+			if verbose {
+				log.Printf("Listing all countries")
+			}
+			listCountries(incidents)
+		}
+		if hasNoun("prodcategories") {
+			if country != "" {
+				if verbose {
+					log.Printf("Filtering by country %s", country)
+				}
+				incidents = filterByCountry(incidents, country)
+			}
+			listProductCategories(incidents)
+		}
+	} else if hasCommand("report") {
+		// reduce incidents
+		incidents = filterByCountry(incidents, country)
+		incidents = filterOutProdCategories(incidents, getProdCategoriesToExclude())
 
-	runReport(incidents, country, month, year, outputFilename, verbose)
+		runReport(incidents, country, month, year, outputFilename, verbose)
+	}
 
 	if verbose {
 		log.Printf("Total running time: %s\n", time.Since(start))
@@ -94,31 +115,31 @@ func runReport(incidents []Incident, country string, month int, year int, output
 
 func hasCommand(command string) bool {
 	// check is enough args
-	if len(os.Args) < 2 {
+	if len(flag.Args()) < 1 {
 		return false
 	}
 
 	// check if arg is an option
-	if strings.HasPrefix(os.Args[1], "-") {
+	if strings.HasPrefix(flag.Args()[0], "-") {
 		return false
 	}
 
 	// check if command is given
-	return os.Args[1] == command
+	return flag.Args()[0] == command
 }
 
 func hasNoun(noun string) bool {
 	// check is enough args
-	if len(os.Args) < 3 {
+	if len(flag.Args()) < 2 {
 		return false
 	}
 
 	// check if arg is an option
-	if strings.HasPrefix(os.Args[2], "-") {
+	if strings.HasPrefix(flag.Args()[1], "-") {
 		return false
 	}
 
 	// check if command is given
-	return os.Args[2] == noun
+	return flag.Args()[1] == noun
 
 }
