@@ -36,21 +36,22 @@ func main() {
 
 	flag.Parse()
 
+	// read configuration file
 	config, err := readConfig(configFilename)
 	if err != nil {
 		log.Fatalf("Error reading config file: %v", err)
 	}
 
-	// process country
+	// get country from config filedefinedviacommand lne args
 	if country == "" {
 		country = config.DefaultCountry
 	}
 
+	// load the incidents
 	incidents, err := importIncidents(inputFilename)
 	if err != nil {
 		log.Fatalf("Error importing %s: %v", inputFilename, err)
 	}
-
 	if verbose {
 		log.Printf("Loaded a total of %d incidents from %s\n", len(incidents), inputFilename)
 	}
@@ -79,7 +80,8 @@ func main() {
 		countryConfig := getCountryFromConfig(config, country)
 
 		incidents = filterOutProdCategories(incidents, countryConfig.FilterOutCategories)
-
+		slaSet := ParseConfig(countryConfig.SLAs)
+		incidents = checkIncidentsAgainstSla(incidents, slaSet)
 		runReport(incidents, country, month, year, outputFilename, verbose)
 	}
 

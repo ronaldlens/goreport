@@ -42,17 +42,7 @@ func importIncidents(filename string) ([]Incident, error) {
 			Service:      parts[headers["Service"]],
 			ServiceCI:    parts[headers["Service CI"]],
 			BusinessArea: parts[headers["Business area"]],
-		}
-
-		switch parts[headers["Priority"]] {
-		case "Critical":
-			inc.Priority = Critical
-		case "High":
-			inc.Priority = High
-		case "Medium":
-			inc.Priority = Medium
-		case "Low":
-			inc.Priority = Low
+			Priority:     StringToPriority(parts[headers["Priority"]]),
 		}
 
 		// get timestamps, createdAt and solvedAt
@@ -74,7 +64,8 @@ func importIncidents(filename string) ([]Incident, error) {
 		} else {
 			inc.OpenTime = 0
 		}
-		inc.SLAMet = checkSLA(&inc)
+
+		//		inc.SLAMet = checkSLA(&inc)
 
 		incidents = append(incidents, inc)
 	}
