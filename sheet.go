@@ -5,6 +5,7 @@ import (
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"log"
 	"strconv"
+	"strings"
 )
 
 type Sheet struct {
@@ -23,6 +24,8 @@ func (sheet *Sheet) wop() {
 func (sheet *Sheet) setupExcelFile() {
 	xls := sheet.file
 	xls.SetActiveSheet(xls.NewSheet("Overview"))
+
+	//xls.DeleteSheet("Sheet1")
 
 	percentStyle, _ := xls.NewStyle(`{"number_format": 9}`)
 
@@ -197,6 +200,68 @@ func (sheet *Sheet) createCharts() {
 	}
 }
 
+func getFilename(country string, month int, year int) string {
+	return fmt.Sprintf("report-%s-%02d-%d.xlsx", strings.ToLower(country), month, year)
+}
+
 func (sheet *Sheet) SaveAs(filename string) error {
+	sheet.file.DeleteSheet("Sheet1")
+	sheet.file.SetActiveSheet(2)
 	return sheet.file.SaveAs(filename)
+}
+
+// if a reference Excel file is provided, go through the incident sheet of that workbook
+// and update our list oif incidents with ones that have a corrected outage time
+// or are marked to be excluded in the reference workbook
+func ProcessReferenceFile(incidents []Incident, referenceFilename string) []Incident {
+
+	// open the reference workbook
+	file, err := excelize.OpenFile(referenceFilename)
+	if err != nil {
+		log.Fatalf("Error opening reference file %s, %v", referenceFilename, err)
+	}
+
+	// get all the rows in the sheet titled Incidents
+	rows, err := file.GetRows("Incidents")
+	if err != nil {
+		log.Fatalf("Error reading rows: %x", err)
+	}
+
+	// skip the first row, this is the header row
+	for index, row := range rows {
+		if index == 0 {
+			continue
+		}
+
+		// column 4 contains the potentially updated outage time in minutes
+		// if it is not 0, copy the value to our incidents list
+		// if the index equals -1, the incident row could not be found
+		if row[4] != "0" {
+			idx := findIncidentById(incidents, row[0])
+			if idx != -1 {
+				incidents[idx].CorrectedTime = row[4]
+			}
+		}
+
+		// column 5 contains whether an incident is to be excluded in the calculations
+		if row[5] != "0" {
+			idx := findIncidentById(incidents, row[0])
+			if idx != -1 {
+				incidents[idx].Exclude = true
+				incidents[idx].SLAReady = false
+			}
+		}
+	}
+	return incidents
+}
+
+// give an ID, find the index of the row for the incident with the ID
+// if the row cannot be found, return -1
+func findIncidentById(incidents []Incident, ID string) int {
+	for idx, incident := range incidents {
+		if incident.ID == ID {
+			return idx
+		}
+	}
+	return -1
 }

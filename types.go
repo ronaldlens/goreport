@@ -26,7 +26,7 @@ type Incident struct {
 	SLAReady        bool
 	SLAMet          bool
 	OpenTime        int
-	CorrectedTime   int
+	CorrectedTime   string
 	CorrectedSolved time.Time
 	Exclude         bool
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"strings"
 
 	"log"
@@ -12,6 +11,7 @@ import (
 // set up command line arguments
 var configFilename string
 var inputFilename string
+var referenceFilename string
 var outputFilename string
 var country string
 var month int
@@ -21,6 +21,7 @@ var verbose bool
 func init() {
 	flag.StringVar(&configFilename, "cfg", "goreport.yaml", "Configuration filename")
 	flag.StringVar(&inputFilename, "input", "allincidents.csv", "Tab delimited incident input filename")
+	flag.StringVar(&referenceFilename, "reference", "", "Excel file to use as input reference")
 	flag.StringVar(&outputFilename, "output", "", "Output filename to use for xlsx file")
 	flag.StringVar(&country, "country", "", "Country to report on")
 
@@ -80,7 +81,21 @@ func main() {
 		countryConfig := getCountryFromConfig(config, country)
 
 		incidents = filterOutProdCategories(incidents, countryConfig.FilterOutCategories)
-		slaSet := ParseConfig(countryConfig.SLAs)
+
+		// if we are to use a reference xlsx, process it
+		// if the name equals to 'same' use the same name as the output
+		// if the name equals to 'previous' or 'prev' use the xlsx from last month
+		if referenceFilename != "" {
+			if referenceFilename == "same" {
+				referenceFilename = getFilename(country, month, year)
+			} else if referenceFilename == "previous" || referenceFilename == "prev" {
+				prevMonth, prevYear := getPreviousMonth(month, year)
+				referenceFilename = getFilename(country, prevMonth, prevYear)
+			}
+			incidents = ProcessReferenceFile(incidents, referenceFilename)
+		}
+
+		slaSet := ParseSLAConfig(countryConfig.SLAs)
 		incidents = checkIncidentsAgainstSla(incidents, slaSet)
 		runReport(incidents, country, month, year, outputFilename, verbose)
 	}
@@ -98,7 +113,7 @@ func runReport(incidents []Incident, country string, month int, year int, output
 	}
 
 	if outputFilename == "" {
-		outputFilename = fmt.Sprintf("report-%s-%02d-%d.xlsx", strings.ToLower(country), month, year)
+		outputFilename = getFilename(country, month, year)
 	}
 
 	var sheet Sheet

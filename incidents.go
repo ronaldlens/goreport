@@ -103,14 +103,17 @@ func reportOnSixMonths(incidents []Incident, month int, year int, sheet *Sheet) 
 					}
 				}
 			}
-			percentage := float64(slaMet) / float64(total)
+			if total != 0 {
+				percentage := float64(slaMet) / float64(total)
+				axis, _ = excelize.CoordinatesToCellName(2+i, 18+priorityIndex)
+				_ = xls.SetCellFloat("Overview", axis, percentage, 2, 32)
+				_ = xls.SetCellStyle("Overview", axis, axis, percentStyle)
+
+			}
 			axis, _ = excelize.CoordinatesToCellName(2+i, 4+priorityIndex)
 			_ = xls.SetCellInt("Overview", axis, total)
 			axis, _ = excelize.CoordinatesToCellName(2+i, 11+priorityIndex)
 			_ = xls.SetCellInt("Overview", axis, slaMet)
-			axis, _ = excelize.CoordinatesToCellName(2+i, 18+priorityIndex)
-			_ = xls.SetCellFloat("Overview", axis, percentage, 2, 32)
-			_ = xls.SetCellStyle("Overview", axis, axis, percentStyle)
 		}
 		month, year = getPreviousMonth(month, year)
 	}

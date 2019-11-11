@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -29,7 +30,7 @@ func PriorityToString(priority int) string {
 	return priorityNames[priority]
 }
 
-func ParseConfig(slaConfig []SLA) [4]SLAEntry {
+func ParseSLAConfig(slaConfig []SLA) [4]SLAEntry {
 	slaSet := [4]SLAEntry{}
 	for _, slaConfigEntry := range slaConfig {
 		id := StringToPriority(slaConfigEntry.Priority)
@@ -64,6 +65,14 @@ func checkSLA(incident Incident, slaSet [4]SLAEntry) bool {
 func checkSLAHours(incident Incident, hours int) bool {
 	duration, _ := time.ParseDuration(fmt.Sprintf("%dh", hours))
 	target := incident.CreatedAt.Add(duration)
+	if incident.CorrectedTime != "" {
+		correctedDuration, err := time.ParseDuration(incident.CorrectedTime)
+		if err != nil {
+			log.Fatalf("Error parsing corrected duration for incident %s: %v", incident.ID, err)
+		}
+		incident.CorrectedSolved = incident.CreatedAt.Add(correctedDuration)
+		return target.After(incident.CorrectedSolved)
+	}
 	return target.After(incident.SolvedAt)
 }
 
@@ -79,6 +88,14 @@ func checkSLABusinessDays(incident Incident, days int) bool {
 		}
 	}
 
+	if incident.CorrectedTime != "" {
+		correctedDuration, err := time.ParseDuration(incident.CorrectedTime)
+		if err != nil {
+			log.Fatalf("Error parsing corrected duration for incident %s: %v", incident.ID, err)
+		}
+		incident.CorrectedSolved = incident.CreatedAt.Add(correctedDuration)
+		return targetTime.After(incident.CorrectedSolved)
+	}
 	return targetTime.After(incident.SolvedAt)
 }
 
