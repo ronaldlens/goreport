@@ -12,9 +12,17 @@ type SLA struct {
 	Days     int
 }
 
+type MinimumIncidents struct {
+	Critical int
+	High     int
+	Medium   int
+	Low      int
+}
+
 type Country struct {
 	Name                string
 	SLAs                []SLA
+	MinimumIncidents    MinimumIncidents
 	FilterOutCategories []string
 }
 

@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// set up command line arguments
+// command line arguments
 var configFilename string
 var inputFilename string
 var referenceFilename string
@@ -19,6 +19,7 @@ var year int
 var verbose bool
 
 func init() {
+	// set up all command line flags
 	flag.StringVar(&configFilename, "cfg", "goreport.yaml", "Configuration filename")
 	flag.StringVar(&inputFilename, "input", "allincidents.csv", "Tab delimited incident input filename")
 	flag.StringVar(&referenceFilename, "reference", "", "Excel file to use as input reference")
@@ -33,8 +34,8 @@ func init() {
 }
 
 func main() {
+	// start time measurement and parse command line flags
 	start := time.Now()
-
 	flag.Parse()
 
 	// read configuration file
@@ -43,9 +44,18 @@ func main() {
 		log.Fatalf("Error reading config file: %v", err)
 	}
 
-	// get country from config filedefinedviacommand lne args
+	// get country from config file
+	// or defined via command lne args
 	if country == "" {
 		country = config.DefaultCountry
+	}
+
+	// if no month or year was supplied
+	// use last month
+	if month == -1 || year == -1 {
+		month = int(time.Now().Month())
+		year = time.Now().Year()
+		month, year = getPreviousMonth(month, year)
 	}
 
 	// load the incidents
@@ -76,10 +86,8 @@ func main() {
 		}
 	} else if hasCommand("report") {
 		// reduce incidents
-		incidents = filterByCountry(incidents, country)
-
 		countryConfig := getCountryFromConfig(config, country)
-
+		incidents = filterByCountry(incidents, country)
 		incidents = filterOutProdCategories(incidents, countryConfig.FilterOutCategories)
 
 		// if we are to use a reference xlsx, process it
@@ -97,7 +105,9 @@ func main() {
 
 		slaSet := ParseSLAConfig(countryConfig.SLAs)
 		incidents = checkIncidentsAgainstSla(incidents, slaSet)
-		runReport(incidents, country, month, year, outputFilename, verbose)
+		runReport(incidents, country, month, year, outputFilename, countryConfig.MinimumIncidents, verbose)
+	} else {
+		log.Fatalf("No command specified")
 	}
 
 	if verbose {
@@ -105,12 +115,7 @@ func main() {
 	}
 }
 
-func runReport(incidents []Incident, country string, month int, year int, outputFilename string, verbose bool) {
-	if month == -1 || year == -1 {
-		month = int(time.Now().Month())
-		year = time.Now().Year()
-		month, year = getPreviousMonth(month, year)
-	}
+func runReport(incidents []Incident, country string, month int, year int, outputFilename string, minimumIncidents MinimumIncidents, verbose bool) {
 
 	if outputFilename == "" {
 		outputFilename = getFilename(country, month, year)
@@ -120,7 +125,7 @@ func runReport(incidents []Incident, country string, month int, year int, output
 	sheet.init()
 	sheet.setupExcelFile()
 
-	reportOnSixMonths(incidents, month, year, &sheet)
+	reportOnSixMonths(incidents, month, year, &sheet, minimumIncidents)
 	sheet.createCharts()
 
 	err := sheet.SaveAs(outputFilename)
@@ -133,6 +138,7 @@ func runReport(incidents []Incident, country string, month int, year int, output
 
 }
 
+// check if the command line contains a specific command (verb)
 func hasCommand(command string) bool {
 	// check is enough args
 	if len(flag.Args()) < 1 {
@@ -148,6 +154,9 @@ func hasCommand(command string) bool {
 	return flag.Args()[0] == command
 }
 
+// used after the command is recognized, check for a noun
+// example ./goreport list countries
+// list is command, countries is noun
 func hasNoun(noun string) bool {
 	// check is enough args
 	if len(flag.Args()) < 2 {

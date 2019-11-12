@@ -10,6 +10,7 @@ const (
 )
 
 var priorityNames = []string{"Critical", "High", "Medium", "Low"}
+var monthNames = []string{"", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 
 type Incident struct {
 	Country         string
