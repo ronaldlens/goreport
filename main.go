@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"strings"
 
 	"log"
@@ -16,6 +17,7 @@ var outputFilename string
 var country string
 var month int
 var year int
+var now bool
 var verbose bool
 
 func init() {
@@ -28,6 +30,7 @@ func init() {
 
 	flag.IntVar(&month, "month", -1, "Month to report on (1..12)")
 	flag.IntVar(&year, "year", -1, "Year to report on")
+	flag.BoolVar(&now, "now", false, "Use current month instead of last month")
 
 	flag.BoolVar(&verbose, "v", false, "Increased verbosity")
 
@@ -51,12 +54,15 @@ func main() {
 	}
 
 	// if no month or year was supplied
-	// use last month
+	// use last month unless now was supplied as an option
 	if month == -1 || year == -1 {
 		month = int(time.Now().Month())
 		year = time.Now().Year()
-		month, year = getPreviousMonth(month, year)
+		if !now {
+			month, year = getPreviousMonth(month, year)
+		}
 	}
+	fmt.Printf("date: %d %d\n", month, year)
 
 	// load the incidents
 	incidents, err := importIncidents(inputFilename)

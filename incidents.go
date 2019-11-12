@@ -89,7 +89,7 @@ func reportOnSixMonths(incidents []Incident, month int, year int, sheet *Sheet, 
 	var calcSlaMetIncidents [7][4]int
 
 	// start 6 months ago
-	month, year = subtractMonths(month, year, 6)
+	month, year = subtractMonths(month, year, 5)
 
 	// repeat for 6 months
 	for index := 0; index < 6; index++ {
