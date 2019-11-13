@@ -72,6 +72,16 @@ func (incidents *Incidents) filterByPriority(priority int) Incidents {
 	return result
 }
 
+func (incidents *Incidents) filterByBusinessArea(area string) Incidents {
+	var result []Incident
+	for _, incident := range *incidents {
+		if incident.BusinessArea == area {
+			result = append(result, incident)
+		}
+	}
+	return result
+}
+
 func (incidents *Incidents) collectProdCategories() map[string]ProdCategory {
 	prodCategories := make(map[string]ProdCategory)
 	for _, incident := range *incidents {
@@ -99,7 +109,7 @@ func (incidents *Incidents) collectProdCategories() map[string]ProdCategory {
 	return prodCategories
 }
 
-func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, sheet *Sheet, minimumIncidentsConfig MinimumIncidents) {
+func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, sheet *Sheet, minimumIncidentsConfig MinimumIncidents) Incidents {
 	xls := sheet.file
 	if area != "" {
 		area = " " + area
@@ -107,7 +117,7 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 	percentStyle, _ := xls.NewStyle(`{"number_format": 9}`)
 
 	// to collect incidents for 'Incidents' tab, contains all incidents for 6 months
-	var sixMonthIncidents []Incident
+	var sixMonthIncidents Incidents
 
 	var totalIncidents [7][4]int
 	var slaMetIncidents [7][4]int
@@ -205,8 +215,9 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 		month, year = getNextMonth(month, year)
 	}
 
-	sheet.addProdCategoriesToSheet(sixMonthIncidents)
-	sheet.addIncidentsToSheet(sixMonthIncidents)
+	return sixMonthIncidents
+	//sheet.addProdCategoriesToSheet(sixMonthIncidents)
+	//sheet.addIncidentsToSheet(sixMonthIncidents)
 }
 
 func getPreviousMonth(month int, year int) (int, int) {

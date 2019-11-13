@@ -21,14 +21,13 @@ func (sheet *Sheet) wop() {
 	fmt.Println("wop")
 }
 
-func (sheet *Sheet) setupExcelFile(area string) {
+func (sheet *Sheet) setupOverviewSheet(area string) {
 	xls := sheet.file
 	if area == "" {
 		xls.SetActiveSheet(xls.NewSheet("Overview"))
 	} else {
 		area = " " + area
 		xls.SetActiveSheet(xls.NewSheet("Overview" + area))
-		fmt.Println(area)
 	}
 
 	//xls.DeleteSheet("Sheet1")

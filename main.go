@@ -109,7 +109,7 @@ func main() {
 
 		slaSet := ParseSLAConfig(countryConfig.SLAs)
 		incidents = checkIncidentsAgainstSla(incidents, slaSet)
-		runReport(&incidents, country, month, year, outputFilename, countryConfig.MinimumIncidents, verbose)
+		runReport(&incidents, country, month, year, countryConfig.SplitArea, outputFilename, countryConfig.MinimumIncidents, verbose)
 	} else {
 		log.Fatalf("No command specified")
 	}
@@ -119,7 +119,7 @@ func main() {
 	}
 }
 
-func runReport(incidents *Incidents, country string, month int, year int, outputFilename string, minimumIncidents MinimumIncidents, verbose bool) {
+func runReport(incidents *Incidents, country string, month int, year int, splitArea bool, outputFilename string, minimumIncidents MinimumIncidents, verbose bool) {
 
 	if outputFilename == "" {
 		outputFilename = getFilename(country, month, year)
@@ -127,10 +127,29 @@ func runReport(incidents *Incidents, country string, month int, year int, output
 
 	var sheet Sheet
 	sheet.init()
-	sheet.setupExcelFile("IT")
 
-	incidents.reportOnSixMonths(month, year, "IT", &sheet, minimumIncidents)
-	sheet.createCharts("IT")
+	var totalIncidents Incidents
+	if splitArea {
+		itIncidents := incidents.filterByBusinessArea("IT")
+		sheet.setupOverviewSheet("IT")
+		itIncidents = itIncidents.reportOnSixMonths(month, year, "IT", &sheet, minimumIncidents)
+		sheet.createCharts("IT")
+
+		networkIncidents := incidents.filterByBusinessArea("Network")
+		sheet.setupOverviewSheet("Network")
+		networkIncidents = networkIncidents.reportOnSixMonths(month, year, "Network", &sheet, minimumIncidents)
+		sheet.createCharts("Network")
+
+		totalIncidents = append(itIncidents, networkIncidents...)
+
+	} else {
+		sheet.setupOverviewSheet("")
+		totalIncidents = incidents.reportOnSixMonths(month, year, "", &sheet, minimumIncidents)
+		sheet.createCharts("")
+	}
+
+	sheet.addProdCategoriesToSheet(totalIncidents)
+	sheet.addIncidentsToSheet(totalIncidents)
 
 	err := sheet.SaveAs(outputFilename)
 	if err != nil {

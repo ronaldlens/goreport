@@ -21,6 +21,7 @@ type MinimumIncidents struct {
 
 type Country struct {
 	Name                string
+	SplitArea           bool
 	SLAs                []SLA
 	MinimumIncidents    MinimumIncidents
 	FilterOutCategories []string
