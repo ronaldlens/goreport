@@ -113,9 +113,10 @@ func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 	_ = xls.SetCellStr("Incidents", "G1", "Priority")
 	_ = xls.SetCellStr("Incidents", "H1", "Product Category")
 	_ = xls.SetCellStr("Incidents", "I1", "Service CI")
-	_ = xls.SetCellStr("Incidents", "J1", "SLA Met")
-	_ = xls.SetCellStr("Incidents", "K1", "Description")
-	_ = xls.SetCellStr("Incidents", "L1", "Resolution")
+	_ = xls.SetCellStr("Incidents", "J1", "Business Area")
+	_ = xls.SetCellStr("Incidents", "K1", "SLA Met")
+	_ = xls.SetCellStr("Incidents", "L1", "Description")
+	_ = xls.SetCellStr("Incidents", "M1", "Resolution")
 
 	maxProdLen := 1
 	maxCILen := 1
@@ -136,9 +137,10 @@ func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 		_ = xls.SetCellValue("Incidents", "G"+rowStr, priorityNames[incident.Priority])
 		_ = xls.SetCellValue("Incidents", "H"+rowStr, incident.ProdCategory)
 		_ = xls.SetCellValue("Incidents", "I"+rowStr, incident.ServiceCI)
-		_ = xls.SetCellValue("Incidents", "J"+rowStr, incident.SLAMet)
-		_ = xls.SetCellValue("Incidents", "K"+rowStr, incident.Description)
-		_ = xls.SetCellValue("Incidents", "L"+rowStr, incident.Resolution)
+		_ = xls.SetCellValue("Incidents", "J"+rowStr, incident.BusinessArea)
+		_ = xls.SetCellValue("Incidents", "K"+rowStr, incident.SLAMet)
+		_ = xls.SetCellValue("Incidents", "L"+rowStr, incident.Description)
+		_ = xls.SetCellValue("Incidents", "M"+rowStr, incident.Resolution)
 
 		if len(incident.ProdCategory) > maxProdLen {
 			maxProdLen = len(incident.ProdCategory)
@@ -159,11 +161,11 @@ func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 	_ = xls.SetColWidth("Incidents", "C", "C", 16.0)
 	_ = xls.SetColWidth("Incidents", "H", "H", 0.9*float64(maxProdLen))
 	_ = xls.SetColWidth("Incidents", "I", "I", 0.9*float64(maxCILen))
-	_ = xls.SetColWidth("Incidents", "K", "K", 0.9*float64(maxDescLen))
-	_ = xls.SetColWidth("Incidents", "L", "L", 0.9*float64(maxResLen))
+	_ = xls.SetColWidth("Incidents", "L", "L", 0.9*float64(maxDescLen))
+	_ = xls.SetColWidth("Incidents", "M", "M", 0.9*float64(maxResLen))
 
 	rowStr := strconv.Itoa(len(incidents) + 1)
-	_ = xls.AutoFilter("Incidents", "A1", "L"+rowStr, "")
+	_ = xls.AutoFilter("Incidents", "A1", "M"+rowStr, "")
 }
 
 func (sheet *Sheet) createCharts(area string) {
