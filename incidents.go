@@ -99,8 +99,11 @@ func (incidents *Incidents) collectProdCategories() map[string]ProdCategory {
 	return prodCategories
 }
 
-func (incidents *Incidents) reportOnSixMonths(month int, year int, sheet *Sheet, minimumIncidentsConfig MinimumIncidents) {
+func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, sheet *Sheet, minimumIncidentsConfig MinimumIncidents) {
 	xls := sheet.file
+	if area != "" {
+		area = " " + area
+	}
 	percentStyle, _ := xls.NewStyle(`{"number_format": 9}`)
 
 	// to collect incidents for 'Incidents' tab, contains all incidents for 6 months
@@ -180,23 +183,23 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, sheet *Sheet,
 		// add the month label
 		monthName := monthNames[month]
 		axis, _ := excelize.CoordinatesToCellName(3+index, 3)
-		_ = xls.SetCellStr("Overview", axis, monthName)
+		_ = xls.SetCellStr("Overview"+area, axis, monthName)
 		axis, _ = excelize.CoordinatesToCellName(3+index, 10)
-		_ = xls.SetCellStr("Overview", axis, monthName)
+		_ = xls.SetCellStr("Overview"+area, axis, monthName)
 		axis, _ = excelize.CoordinatesToCellName(3+index, 17)
-		_ = xls.SetCellStr("Overview", axis, monthName)
+		_ = xls.SetCellStr("Overview"+area, axis, monthName)
 
 		for _, priority := range []int{Critical, High, Medium, Low} {
 			axis, _ = excelize.CoordinatesToCellName(3+index, 4+priority)
-			_ = xls.SetCellInt("Overview", axis, totalIncidents[index][priority])
+			_ = xls.SetCellInt("Overview"+area, axis, totalIncidents[index][priority])
 			axis, _ = excelize.CoordinatesToCellName(3+index, 11+priority)
-			_ = xls.SetCellInt("Overview", axis, slaMetIncidents[index][priority])
+			_ = xls.SetCellInt("Overview"+area, axis, slaMetIncidents[index][priority])
 
 			if calcTotalIncidents[index][priority] != 0 {
 				percentage := float64(calcSlaMetIncidents[index][priority]) / float64(calcTotalIncidents[index][priority])
 				axis, _ = excelize.CoordinatesToCellName(3+index, 18+priority)
-				_ = xls.SetCellFloat("Overview", axis, percentage, 2, 32)
-				_ = xls.SetCellStyle("Overview", axis, axis, percentStyle)
+				_ = xls.SetCellFloat("Overview"+area, axis, percentage, 2, 32)
+				_ = xls.SetCellStyle("Overview"+area, axis, axis, percentStyle)
 			}
 		}
 		month, year = getNextMonth(month, year)

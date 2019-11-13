@@ -21,33 +21,39 @@ func (sheet *Sheet) wop() {
 	fmt.Println("wop")
 }
 
-func (sheet *Sheet) setupExcelFile() {
+func (sheet *Sheet) setupExcelFile(area string) {
 	xls := sheet.file
-	xls.SetActiveSheet(xls.NewSheet("Overview"))
+	if area == "" {
+		xls.SetActiveSheet(xls.NewSheet("Overview"))
+	} else {
+		area = " " + area
+		xls.SetActiveSheet(xls.NewSheet("Overview" + area))
+		fmt.Println(area)
+	}
 
 	//xls.DeleteSheet("Sheet1")
 
 	percentStyle, _ := xls.NewStyle(`{"number_format": 9}`)
 
-	_ = xls.SetCellStr("Overview", "A2", "Total Incidents")
-	_ = xls.SetCellStr("Overview", "A3", "Priority")
-	_ = xls.SetCellStr("Overview", "A9", "SLA Met Incidents")
-	_ = xls.SetCellStr("Overview", "A10", "Priority")
-	_ = xls.SetCellStr("Overview", "A16", "SLA Performance")
-	_ = xls.SetCellStr("Overview", "A17", "Priority")
-	_ = xls.SetCellStr("Overview", "B17", "Target")
+	_ = xls.SetCellStr("Overview"+area, "A2", "Total Incidents"+area)
+	_ = xls.SetCellStr("Overview"+area, "A3", "Priority")
+	_ = xls.SetCellStr("Overview"+area, "A9", "SLA Met Incidents"+area)
+	_ = xls.SetCellStr("Overview"+area, "A10", "Priority")
+	_ = xls.SetCellStr("Overview"+area, "A16", "SLA Performance"+area)
+	_ = xls.SetCellStr("Overview"+area, "A17", "Priority")
+	_ = xls.SetCellStr("Overview"+area, "B17", "Target")
 
 	for idx, priorityName := range priorityNames {
 		axis, _ := excelize.CoordinatesToCellName(1, idx+4)
-		_ = xls.SetCellStr("Overview", axis, priorityName)
+		_ = xls.SetCellStr("Overview"+area, axis, priorityName)
 		axis, _ = excelize.CoordinatesToCellName(1, idx+11)
-		_ = xls.SetCellStr("Overview", axis, priorityName)
+		_ = xls.SetCellStr("Overview"+area, axis, priorityName)
 		axis, _ = excelize.CoordinatesToCellName(1, idx+18)
-		_ = xls.SetCellStr("Overview", axis, priorityName)
+		_ = xls.SetCellStr("Overview"+area, axis, priorityName)
 
 		axis, _ = excelize.CoordinatesToCellName(2, idx+18)
-		_ = xls.SetCellFloat("Overview", axis, 0.8, 2, 32)
-		_ = xls.SetCellStyle("Overview", axis, axis, percentStyle)
+		_ = xls.SetCellFloat("Overview"+area, axis, 0.8, 2, 32)
+		_ = xls.SetCellStyle("Overview"+area, axis, axis, percentStyle)
 	}
 }
 
@@ -161,11 +167,15 @@ func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 	_ = xls.AutoFilter("Incidents", "A1", "L"+rowStr, "")
 }
 
-func (sheet *Sheet) createCharts() {
+func (sheet *Sheet) createCharts(area string) {
 	xls := sheet.file
+	if area != "" {
+		area = " " + area
+	}
+
 	series := ""
 	for _, i := range []int{4, 5, 6, 7} {
-		series += fmt.Sprintf("{\"name\":\"Overview!$A$%d\",\"categories\":\"Overview!$C$3:$H$3\",\"values\":\"Overview!$C%d:$H%d\"}", i, i, i)
+		series += fmt.Sprintf("{\"name\":\"'Overview"+area+"'!$A$%d\",\"categories\":\"'Overview"+area+"'!$C$3:$H$3\",\"values\":\"'Overview"+area+"'!$C%d:$H%d\"}", i, i, i)
 		if i != 7 {
 			series += ","
 		}
@@ -173,17 +183,17 @@ func (sheet *Sheet) createCharts() {
 	cs := fmt.Sprintf("{\"type\":\"line\",\"series\":[%s],", series)
 	cs += "\"format\":{\"x_scale\":1.0,\"y_scale\":1.0,\"x_offset\":15,\"y_offset\":10,\"print_obj\":true,\"lock_aspect_ratio\":false,\"locked\":false},"
 	cs += "\"legend\":{\"position\":\"bottom\",\"show_legend_key\":false},"
-	cs += "\"title\":{\"name\":\"Total Incidents\"},"
+	cs += "\"title\":{\"name\":\"Total Incidents" + area + "\"},"
 	cs += "\"plotarea\":{\"show_bubble_size\":false,\"show_cat_name\":false,\"show_leader_lines\":true,\"show_percent\":false,\"show_series_name\":false,\"show_val\":false},\"show_blanks_as\":\"gap\"}"
 
-	err := xls.AddChart("Overview", "J2", cs)
+	err := xls.AddChart("Overview"+area, "J2", cs)
 	if err != nil {
 		log.Fatalf("Error adding chart: %v", err)
 	}
 
 	series = ""
 	for _, i := range []int{18, 19, 20, 21} {
-		series += fmt.Sprintf("{\"name\":\"Overview!$A$%d\",\"categories\":\"Overview!$C$3:$H$3\",\"values\":\"Overview!$C%d:$H%d\"}", i, i, i)
+		series += fmt.Sprintf("{\"name\":\"'Overview"+area+"'!$A$%d\",\"categories\":\"'Overview"+area+"'!$C$3:$H$3\",\"values\":\"'Overview"+area+"'!$C%d:$H%d\"}", i, i, i)
 		if i != 21 {
 			series += ","
 		}
@@ -191,10 +201,10 @@ func (sheet *Sheet) createCharts() {
 	cs = fmt.Sprintf("{\"type\":\"line\",\"series\":[%s],", series)
 	cs += "\"format\":{\"x_scale\":1.0,\"y_scale\":1.0,\"x_offset\":15,\"y_offset\":10,\"print_obj\":true,\"lock_aspect_ratio\":false,\"locked\":false},"
 	cs += "\"legend\":{\"position\":\"bottom\",\"show_legend_key\":false},"
-	cs += "\"title\":{\"name\":\"SLA Performance\"},"
+	cs += "\"title\":{\"name\":\"SLA Performance" + area + "\"},"
 	cs += "\"plotarea\":{\"show_bubble_size\":false,\"show_cat_name\":false,\"show_leader_lines\":true,\"show_percent\":false,\"show_series_name\":false,\"show_val\":false},\"show_blanks_as\":\"gap\"}"
 
-	err = xls.AddChart("Overview", "J18", cs)
+	err = xls.AddChart("Overview"+area, "J18", cs)
 	if err != nil {
 		log.Fatalf("Error adding chart: %v", err)
 	}

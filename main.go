@@ -127,10 +127,10 @@ func runReport(incidents *Incidents, country string, month int, year int, output
 
 	var sheet Sheet
 	sheet.init()
-	sheet.setupExcelFile()
+	sheet.setupExcelFile("IT")
 
-	incidents.reportOnSixMonths(month, year, &sheet, minimumIncidents)
-	sheet.createCharts()
+	incidents.reportOnSixMonths(month, year, "IT", &sheet, minimumIncidents)
+	sheet.createCharts("IT")
 
 	err := sheet.SaveAs(outputFilename)
 	if err != nil {
