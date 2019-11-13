@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func importIncidents(filename string) ([]Incident, error) {
+func importIncidents(filename string) (Incidents, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		log.Printf("Trying to open %s: %v", filename, err)

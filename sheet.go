@@ -51,7 +51,7 @@ func (sheet *Sheet) setupExcelFile() {
 	}
 }
 
-func (sheet *Sheet) addProdCategoriesToSheet(incidents []Incident) {
+func (sheet *Sheet) addProdCategoriesToSheet(incidents Incidents) {
 	xls := sheet.file
 	xls.SetActiveSheet(xls.NewSheet("ProdCat"))
 
@@ -66,7 +66,7 @@ func (sheet *Sheet) addProdCategoriesToSheet(incidents []Incident) {
 
 	// get categories, initialize the row
 	// initialize max length to later set the width of the name column
-	categories := collectProdCategories(incidents)
+	categories := incidents.collectProdCategories()
 	row := 1
 	maxLen := 1
 

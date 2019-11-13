@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"strings"
 
 	"log"
@@ -62,7 +61,6 @@ func main() {
 			month, year = getPreviousMonth(month, year)
 		}
 	}
-	fmt.Printf("date: %d %d\n", month, year)
 
 	// load the incidents
 	incidents, err := importIncidents(inputFilename)
@@ -86,15 +84,15 @@ func main() {
 				if verbose {
 					log.Printf("Filtering by country %s", country)
 				}
-				incidents = filterByCountry(incidents, country)
+				incidents = incidents.filterByCountry(country)
 			}
 			listProductCategories(incidents)
 		}
 	} else if hasCommand("report") {
 		// reduce incidents
 		countryConfig := getCountryFromConfig(config, country)
-		incidents = filterByCountry(incidents, country)
-		incidents = filterOutProdCategories(incidents, countryConfig.FilterOutCategories)
+		incidents = incidents.filterByCountry(country)
+		incidents = incidents.filterOutProdCategories(countryConfig.FilterOutCategories)
 
 		// if we are to use a reference xlsx, process it
 		// if the name equals to 'same' use the same name as the output
@@ -111,7 +109,7 @@ func main() {
 
 		slaSet := ParseSLAConfig(countryConfig.SLAs)
 		incidents = checkIncidentsAgainstSla(incidents, slaSet)
-		runReport(incidents, country, month, year, outputFilename, countryConfig.MinimumIncidents, verbose)
+		runReport(&incidents, country, month, year, outputFilename, countryConfig.MinimumIncidents, verbose)
 	} else {
 		log.Fatalf("No command specified")
 	}
@@ -121,7 +119,7 @@ func main() {
 	}
 }
 
-func runReport(incidents []Incident, country string, month int, year int, outputFilename string, minimumIncidents MinimumIncidents, verbose bool) {
+func runReport(incidents *Incidents, country string, month int, year int, outputFilename string, minimumIncidents MinimumIncidents, verbose bool) {
 
 	if outputFilename == "" {
 		outputFilename = getFilename(country, month, year)
@@ -131,7 +129,7 @@ func runReport(incidents []Incident, country string, month int, year int, output
 	sheet.init()
 	sheet.setupExcelFile()
 
-	reportOnSixMonths(incidents, month, year, &sheet, minimumIncidents)
+	incidents.reportOnSixMonths(month, year, &sheet, minimumIncidents)
 	sheet.createCharts()
 
 	err := sheet.SaveAs(outputFilename)

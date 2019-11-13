@@ -3,12 +3,35 @@ package main
 import (
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"strings"
+	"time"
 )
 
-func filterOutProdCategories(incidents []Incident, categories []string) []Incident {
+type Incidents []Incident
+
+type Incident struct {
+	Country         string
+	ID              string
+	CreatedAt       time.Time
+	SolvedAt        time.Time
+	Priority        int
+	Description     string
+	Resolution      string
+	Service         string
+	ProdCategory    string
+	ServiceCI       string
+	BusinessArea    string
+	SLAReady        bool
+	SLAMet          bool
+	OpenTime        int
+	CorrectedTime   string
+	CorrectedSolved time.Time
+	Exclude         bool
+}
+
+func (incidents *Incidents) filterOutProdCategories(categories []string) Incidents {
 	var result []Incident
 OuterLoop:
-	for _, incident := range incidents {
+	for _, incident := range *incidents {
 		for _, category := range categories {
 			if strings.Contains(incident.ProdCategory, category) {
 				continue OuterLoop
@@ -19,9 +42,9 @@ OuterLoop:
 	return result
 }
 
-func filterByCountry(incidents []Incident, country string) []Incident {
+func (incidents *Incidents) filterByCountry(country string) Incidents {
 	var result []Incident
-	for _, incident := range incidents {
+	for _, incident := range *incidents {
 		if strings.Contains(incident.Country, country) {
 			result = append(result, incident)
 		}
@@ -29,9 +52,9 @@ func filterByCountry(incidents []Incident, country string) []Incident {
 	return result
 }
 
-func filterByMonthYear(incidents []Incident, month int, year int) []Incident {
+func (incidents *Incidents) filterByMonthYear(month int, year int) Incidents {
 	var result []Incident
-	for _, incident := range incidents {
+	for _, incident := range *incidents {
 		if int(incident.CreatedAt.Month()) == month && incident.CreatedAt.Year() == year {
 			result = append(result, incident)
 		}
@@ -39,9 +62,9 @@ func filterByMonthYear(incidents []Incident, month int, year int) []Incident {
 	return result
 }
 
-func filterByPriority(incidents []Incident, priority int) []Incident {
+func (incidents *Incidents) filterByPriority(priority int) Incidents {
 	var result []Incident
-	for _, incident := range incidents {
+	for _, incident := range *incidents {
 		if incident.Priority == priority {
 			result = append(result, incident)
 		}
@@ -49,9 +72,9 @@ func filterByPriority(incidents []Incident, priority int) []Incident {
 	return result
 }
 
-func collectProdCategories(incidents []Incident) map[string]ProdCategory {
+func (incidents *Incidents) collectProdCategories() map[string]ProdCategory {
 	prodCategories := make(map[string]ProdCategory)
-	for _, incident := range incidents {
+	for _, incident := range *incidents {
 		category, found := prodCategories[incident.ProdCategory]
 		if !found {
 			category = ProdCategory{}
@@ -76,7 +99,7 @@ func collectProdCategories(incidents []Incident) map[string]ProdCategory {
 	return prodCategories
 }
 
-func reportOnSixMonths(incidents []Incident, month int, year int, sheet *Sheet, minimumIncidentsConfig MinimumIncidents) {
+func (incidents *Incidents) reportOnSixMonths(month int, year int, sheet *Sheet, minimumIncidentsConfig MinimumIncidents) {
 	xls := sheet.file
 	percentStyle, _ := xls.NewStyle(`{"number_format": 9}`)
 
@@ -102,14 +125,14 @@ func reportOnSixMonths(incidents []Incident, month int, year int, sheet *Sheet, 
 
 		// get incidents for a month
 		// add them to the grand list
-		monthIncidents := filterByMonthYear(incidents, month, year)
+		monthIncidents := incidents.filterByMonthYear(month, year)
 		sixMonthIncidents = append(sixMonthIncidents, monthIncidents...)
 
 		// go through all priorities
 		// iterate over all incidents for that priority
 		// and update the 2 counters
 		for _, priority := range []int{Critical, High, Medium, Low} {
-			priorityIncidents := filterByPriority(monthIncidents, priority)
+			priorityIncidents := monthIncidents.filterByPriority(priority)
 			for _, incident := range priorityIncidents {
 				if incident.SLAReady {
 					totalIncidents[index][priority]++

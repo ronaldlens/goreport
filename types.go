@@ -1,7 +1,5 @@
 package main
 
-import "time"
-
 const (
 	Critical = iota
 	High
@@ -11,26 +9,17 @@ const (
 
 var priorityNames = []string{"Critical", "High", "Medium", "Low"}
 var monthNames = []string{"", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
-
-type Incident struct {
-	Country         string
-	ID              string
-	CreatedAt       time.Time
-	SolvedAt        time.Time
-	Priority        int
-	Description     string
-	Resolution      string
-	Service         string
-	ProdCategory    string
-	ServiceCI       string
-	BusinessArea    string
-	SLAReady        bool
-	SLAMet          bool
-	OpenTime        int
-	CorrectedTime   string
-	CorrectedSolved time.Time
-	Exclude         bool
-}
+var ITServicesNames = []string{
+	"CRM",
+	"Billing",
+	"Provisioning",
+	"Web",
+	"DTV",
+	"Service Assurance",
+	"ERP",
+	"Middleware",
+	"Infrastructure",
+	"Hosted services"}
 
 type ProdCategory struct {
 	Total    int
