@@ -8,8 +8,11 @@ const (
 	Low
 )
 
-var priorityNames = []string{"Critical", "High", "Medium", "Low"}
-var monthNames = []string{"", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+// PriorityNames is an array continaing strings describing the priority
+var PriorityNames = []string{"Critical", "High", "Medium", "Low"}
+
+// MonthNames is an array continaing the short names of months. It is 1 based, not 0 based!
+var MonthNames = []string{"", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 
 // ITServicesNames is used for determining service availability in IT
 var ITServicesNames = []string{

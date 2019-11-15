@@ -50,7 +50,6 @@ func readConfig(filename string) (Config, error) {
 	if err != nil {
 		return config, err
 	}
-	//fmt.Printf("read config:\n%v\n", config)
 	return config, nil
 }
 
