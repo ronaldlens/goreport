@@ -193,7 +193,7 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 	for index := 0; index < 6; index++ {
 
 		// add the month label
-		monthName := monthNames[month]
+		monthName := MonthNames[month]
 		axis, _ := excelize.CoordinatesToCellName(3+index, 3)
 		_ = xls.SetCellStr("Overview"+area, axis, monthName)
 		axis, _ = excelize.CoordinatesToCellName(3+index, 10)

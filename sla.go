@@ -32,7 +32,7 @@ func StringToPriority(str string) int {
 
 // PriorityToString converts priority as an int to a string describing the name
 func PriorityToString(priority int) string {
-	return priorityNames[priority]
+	return PriorityNames[priority]
 }
 
 // ParseSLAConfig takes an array of SLA from the configuration and converts
