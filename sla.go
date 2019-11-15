@@ -6,11 +6,15 @@ import (
 	"time"
 )
 
+// SLAEntry is a struct describing SLA for a given priority,
+// Either hours or days has a value, the other defaults to 0.
+// days means business days
 type SLAEntry struct {
 	hours int
 	days  int
 }
 
+// StringToPriority converts a string describing the priority to int
 func StringToPriority(str string) int {
 	switch str {
 	case "Critical":
@@ -26,10 +30,13 @@ func StringToPriority(str string) int {
 	}
 }
 
+// PriorityToString converts priority as an int to a string describing the name
 func PriorityToString(priority int) string {
 	return priorityNames[priority]
 }
 
+// ParseSLAConfig takes an array of SLA from the configuration and converts
+// it to an array of SLAEntry structs
 func ParseSLAConfig(slaConfig []SLA) [4]SLAEntry {
 	slaSet := [4]SLAEntry{}
 	for _, slaConfigEntry := range slaConfig {
@@ -40,7 +47,7 @@ func ParseSLAConfig(slaConfig []SLA) [4]SLAEntry {
 	return slaSet
 }
 
-func checkIncidentsAgainstSla(incidents []Incident, slaSet [4]SLAEntry) []Incident {
+func checkIncidentsAgainstSLA(incidents []Incident, slaSet [4]SLAEntry) []Incident {
 	var slaIncidents []Incident
 	for _, incident := range incidents {
 		incident.SLAMet = checkSLA(incident, slaSet)
@@ -57,9 +64,9 @@ func checkSLA(incident Incident, slaSet [4]SLAEntry) bool {
 	}
 	if slaSet[incident.Priority].days == 0 {
 		return checkSLAHours(incident, slaSet[incident.Priority].hours)
-	} else {
-		return checkSLABusinessDays(incident, slaSet[incident.Priority].days)
 	}
+	return checkSLABusinessDays(incident, slaSet[incident.Priority].days)
+
 }
 
 func checkSLAHours(incident Incident, hours int) bool {

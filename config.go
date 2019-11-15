@@ -6,12 +6,16 @@ import (
 	"log"
 )
 
+// SLA struct in the configuration file
+// Either Hours or Days has a value
 type SLA struct {
 	Priority string
 	Hours    int
 	Days     int
 }
 
+// MinimumIncidents used for TTR performance measurement
+// If minimum not reached, value will carry over to the next month
 type MinimumIncidents struct {
 	Critical int
 	High     int
@@ -19,6 +23,7 @@ type MinimumIncidents struct {
 	Low      int
 }
 
+// Country struct holds the configuration for a given country
 type Country struct {
 	Name                string
 	SplitArea           bool
@@ -27,6 +32,8 @@ type Country struct {
 	FilterOutCategories []string
 }
 
+// Config struct contains the overall configuration
+// Default country is optional
 type Config struct {
 	DefaultCountry string
 	Countries      []Country

@@ -108,8 +108,10 @@ func main() {
 		}
 
 		slaSet := ParseSLAConfig(countryConfig.SLAs)
-		incidents = checkIncidentsAgainstSla(incidents, slaSet)
+		incidents = checkIncidentsAgainstSLA(incidents, slaSet)
 		runReport(&incidents, country, month, year, countryConfig.SplitArea, outputFilename, countryConfig.MinimumIncidents, verbose)
+	} else if hasCommand("gui") {
+		RunGui(incidents)
 	} else {
 		log.Fatalf("No command specified")
 	}

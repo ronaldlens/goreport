@@ -13,11 +13,11 @@ func Test_checkSLAHours(t *testing.T) {
 	time4h := time2h.Add(oneHour).Add(oneHour)
 
 	incident := Incident{CreatedAt: timeStart, SolvedAt: time1h}
-	if !checkSLAHours(&incident, 2) {
+	if !checkSLAHours(incident, 2) {
 		t.Errorf("checkSLAHours=1h, SLA=2h")
 	}
 	incident.SolvedAt = time4h
-	if checkSLAHours(&incident, 2) {
+	if checkSLAHours(incident, 2) {
 		t.Errorf("checkSLAHours=4h, SLA=2h")
 	}
 
@@ -34,19 +34,19 @@ func Test_checkSLABusinessDays(t *testing.T) {
 
 	// start on Sunday, solve on Sunday
 	incident := Incident{CreatedAt: timeStart, SolvedAt: timePlus12}
-	if !checkSLABusinessDays(&incident, 1) {
+	if !checkSLABusinessDays(incident, 1) {
 		t.Errorf("checkSLABusinessDays created:%v solved:%v, SLA=1d", incident.CreatedAt, incident.SolvedAt)
 	}
 
 	// start on Sunday, solve on Monday
 	incident.SolvedAt = timePlus24
-	if !checkSLABusinessDays(&incident, 1) {
+	if !checkSLABusinessDays(incident, 1) {
 		t.Errorf("checkSLABusinessDays created:%v solved:%v, SLA=1d", incident.CreatedAt, incident.SolvedAt)
 	}
 
 	// start on Sunday, solve on Tuesday
 	incident.SolvedAt = timePlus48
-	if checkSLABusinessDays(&incident, 1) {
+	if checkSLABusinessDays(incident, 1) {
 		t.Errorf("checkSLABusinessDays created:%v solved:%v, SLA=1d", incident.CreatedAt, incident.SolvedAt)
 	}
 
@@ -60,13 +60,13 @@ func Test_checkSLABusinessDays(t *testing.T) {
 	incident.SolvedAt = timePlus12
 
 	// start on Monday, solve on Monday
-	if !checkSLABusinessDays(&incident, 1) {
+	if !checkSLABusinessDays(incident, 1) {
 		t.Errorf("checkSLABusinessDays created:%v solved:%v, SLA=1d", incident.CreatedAt, incident.SolvedAt)
 	}
 
 	// start on Monday, solve on Tuesday
 	incident.SolvedAt = timePlus24
-	if !checkSLABusinessDays(&incident, 1) {
+	if !checkSLABusinessDays(incident, 1) {
 		t.Errorf("checkSLABusinessDays created:%v solved:%v, SLA=1d", incident.CreatedAt, incident.SolvedAt)
 	}
 }

@@ -6,8 +6,10 @@ import (
 	"time"
 )
 
+// Incidents type contains and array of Incident
 type Incidents []Incident
 
+// Incident struct described an incident
 type Incident struct {
 	Country         string
 	ID              string
@@ -122,7 +124,7 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 	var totalIncidents [7][4]int
 	var slaMetIncidents [7][4]int
 	var calcTotalIncidents [7][4]int
-	var calcSlaMetIncidents [7][4]int
+	var calcSLAMetIncidents [7][4]int
 
 	// start 6 months ago
 	month, year = subtractMonths(month, year, 5)
@@ -157,7 +159,7 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 
 			// copy to the value used to calculate performance
 			calcTotalIncidents[index][priority] = totalIncidents[index][priority]
-			calcSlaMetIncidents[index][priority] = slaMetIncidents[index][priority]
+			calcSLAMetIncidents[index][priority] = slaMetIncidents[index][priority]
 		}
 
 		// advance month, check for year rollover
@@ -179,8 +181,8 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 			if calcTotalIncidents[index][priority] < minimumIncidents[priority] {
 				calcTotalIncidents[index+1][priority] += calcTotalIncidents[index][priority]
 				calcTotalIncidents[index][priority] = 0
-				calcSlaMetIncidents[index+1][priority] += calcSlaMetIncidents[index][priority]
-				calcSlaMetIncidents[index][priority] = 0
+				calcSLAMetIncidents[index+1][priority] += calcSLAMetIncidents[index][priority]
+				calcSLAMetIncidents[index][priority] = 0
 			}
 		}
 	}
@@ -206,7 +208,7 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 			_ = xls.SetCellInt("Overview"+area, axis, slaMetIncidents[index][priority])
 
 			if calcTotalIncidents[index][priority] != 0 {
-				percentage := float64(calcSlaMetIncidents[index][priority]) / float64(calcTotalIncidents[index][priority])
+				percentage := float64(calcSLAMetIncidents[index][priority]) / float64(calcTotalIncidents[index][priority])
 				axis, _ = excelize.CoordinatesToCellName(3+index, 18+priority)
 				_ = xls.SetCellFloat("Overview"+area, axis, percentage, 2, 32)
 				_ = xls.SetCellStyle("Overview"+area, axis, axis, percentStyle)

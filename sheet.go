@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Sheet is a struct containing the filename and the excelize.File
 type Sheet struct {
 	filename string
 	file     *excelize.File
@@ -215,13 +216,16 @@ func getFilename(country string, month int, year int) string {
 	return fmt.Sprintf("report-%s-%02d-%d.xlsx", strings.ToLower(country), month, year)
 }
 
+// SaveAs fixes the sheets (removes the default 'Sheet1' and sets the active sheet to the next one)
+// and saves it. It returns an error if saving fails
 func (sheet *Sheet) SaveAs(filename string) error {
 	sheet.file.DeleteSheet("Sheet1")
 	sheet.file.SetActiveSheet(2)
 	return sheet.file.SaveAs(filename)
 }
 
-// if a reference Excel file is provided, go through the incident sheet of that workbook
+// ProcessReferenceFile processes the chnages made in an excel file.
+// If a reference Excel file is provided, go through the incident sheet of that workbook
 // and update our list oif incidents with ones that have a corrected outage time
 // or are marked to be excluded in the reference workbook
 func ProcessReferenceFile(incidents []Incident, referenceFilename string) []Incident {
@@ -248,7 +252,7 @@ func ProcessReferenceFile(incidents []Incident, referenceFilename string) []Inci
 		// if it is not 0, copy the value to our incidents list
 		// if the index equals -1, the incident row could not be found
 		if row[4] != "0" {
-			idx := findIncidentById(incidents, row[0])
+			idx := findIncidentByID(incidents, row[0])
 			if idx != -1 {
 				incidents[idx].CorrectedTime = row[4]
 			}
@@ -256,7 +260,7 @@ func ProcessReferenceFile(incidents []Incident, referenceFilename string) []Inci
 
 		// column 5 contains whether an incident is to be excluded in the calculations
 		if row[5] != "0" {
-			idx := findIncidentById(incidents, row[0])
+			idx := findIncidentByID(incidents, row[0])
 			if idx != -1 {
 				incidents[idx].Exclude = true
 				incidents[idx].SLAReady = false
@@ -268,7 +272,7 @@ func ProcessReferenceFile(incidents []Incident, referenceFilename string) []Inci
 
 // give an ID, find the index of the row for the incident with the ID
 // if the row cannot be found, return -1
-func findIncidentById(incidents []Incident, ID string) int {
+func findIncidentByID(incidents []Incident, ID string) int {
 	for idx, incident := range incidents {
 		if incident.ID == ID {
 			return idx
