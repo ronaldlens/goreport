@@ -43,7 +43,7 @@ func (sheet *Sheet) setupOverviewSheet(area string) {
 	_ = xls.SetCellStr("Overview"+area, "A17", "Priority")
 	_ = xls.SetCellStr("Overview"+area, "B17", "Target")
 
-	for idx, priorityName := range priorityNames {
+	for idx, priorityName := range PriorityNames {
 		axis, _ := excelize.CoordinatesToCellName(1, idx+4)
 		_ = xls.SetCellStr("Overview"+area, axis, priorityName)
 		axis, _ = excelize.CoordinatesToCellName(1, idx+11)
@@ -135,7 +135,7 @@ func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 		_ = xls.SetCellValue("Incidents", "D"+rowStr, incident.OpenTime)
 		_ = xls.SetCellValue("Incidents", "E"+rowStr, incident.CorrectedTime)
 		_ = xls.SetCellValue("Incidents", "F"+rowStr, incident.Exclude)
-		_ = xls.SetCellValue("Incidents", "G"+rowStr, priorityNames[incident.Priority])
+		_ = xls.SetCellValue("Incidents", "G"+rowStr, PriorityNames[incident.Priority])
 		_ = xls.SetCellValue("Incidents", "H"+rowStr, incident.ProdCategory)
 		_ = xls.SetCellValue("Incidents", "I"+rowStr, incident.ServiceCI)
 		_ = xls.SetCellValue("Incidents", "J"+rowStr, incident.BusinessArea)
