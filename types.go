@@ -27,6 +27,17 @@ var ITServicesNames = []string{
 	"Infrastructure",
 	"Hosted services"}
 
+// NWServiceNames is used to determine the service availability on the network side
+var NWServiceNames = []string{
+	"Internet",
+	"Voice",
+	"CATV",
+	"D4A",
+	"Dawn",
+	"Horizon TV",
+	"Horizon GO",
+}
+
 // ProdCategory is a struct describing a row in the product category tab
 type ProdCategory struct {
 	Total    int

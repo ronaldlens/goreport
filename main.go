@@ -80,8 +80,7 @@ func main() {
 				log.Printf("Listing all countries")
 			}
 			listCountries(incidents)
-		}
-		if hasNoun("prodcategories") {
+		} else if hasNoun("prodcategories") {
 			if flagVars.country != "" {
 				if flagVars.verbose {
 					log.Printf("Filtering by country %s", flagVars.country)
@@ -89,6 +88,14 @@ func main() {
 				incidents = incidents.filterByCountry(flagVars.country)
 			}
 			listProductCategories(incidents)
+		} else if hasNoun("services") {
+			if flagVars.country != "" {
+				if flagVars.verbose {
+					log.Printf("Filtering by country %s", flagVars.country)
+				}
+				incidents = incidents.filterByCountry(flagVars.country)
+			}
+			listServices(incidents)
 		}
 	} else if hasCommand("report") {
 		// reduce incidents

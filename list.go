@@ -23,5 +23,15 @@ func listProductCategories(incidents []Incident) {
 	for category := range categories {
 		fmt.Println(category)
 	}
+}
 
+func listServices(incidents []Incident) {
+	services := make(map[string]int)
+	for _, incident := range incidents {
+		services[incident.Service] = 1
+	}
+
+	for category := range services {
+		fmt.Println(category)
+	}
 }
