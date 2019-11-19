@@ -84,6 +84,16 @@ func (incidents *Incidents) filterByBusinessArea(area string) Incidents {
 	return result
 }
 
+func (incidents *Incidents) filterByService(service string) Incidents {
+	var result []Incident
+	for _, incident := range *incidents {
+		if incident.Service == service {
+			result = append(result, incident)
+		}
+	}
+	return result
+}
+
 func (incidents *Incidents) collectProdCategories() map[string]ProdCategory {
 	prodCategories := make(map[string]ProdCategory)
 	for _, incident := range *incidents {
