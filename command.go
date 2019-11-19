@@ -42,7 +42,8 @@ func processCommandLineArgs() {
 	flag.Parse()
 
 	// read configuration file
-	config, err := readConfig(flagVars.configFilename)
+	var err error
+	config, err = readConfig(flagVars.configFilename)
 	if err != nil {
 		log.Fatalf("Error reading config file: %v", err)
 	}

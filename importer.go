@@ -65,8 +65,6 @@ func importIncidents(filename string) (Incidents, error) {
 			inc.OpenTime = 0
 		}
 
-		//		inc.SLAMet = checkSLA(&inc)
-
 		incidents = append(incidents, inc)
 	}
 

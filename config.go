@@ -1,9 +1,11 @@
 package main
 
 import (
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"time"
+
+	"gopkg.in/yaml.v2"
 )
 
 // SLA struct in the configuration file
@@ -25,11 +27,14 @@ type MinimumIncidents struct {
 
 // Country struct holds the configuration for a given country
 type Country struct {
-	Name                string
-	SplitArea           bool
-	SLAs                []SLA
-	MinimumIncidents    MinimumIncidents
-	FilterOutCategories []string
+	Name                 string
+	SplitArea            bool
+	ITServiceWindow      string
+	ITServiceWindowStart time.Time
+	ITServiceWindowEnd   time.Time
+	SLAs                 []SLA
+	MinimumIncidents     MinimumIncidents
+	FilterOutCategories  []string
 }
 
 // Config struct contains the overall configuration
@@ -40,6 +45,9 @@ type Config struct {
 }
 
 func readConfig(filename string) (Config, error) {
+	if flagVars.verbose {
+		log.Printf("Loading config file: %s", filename)
+	}
 	config := Config{}
 	dat, err := ioutil.ReadFile(filename)
 	if err != nil {

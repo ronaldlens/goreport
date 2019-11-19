@@ -31,9 +31,9 @@ func StringToPriority(str string) int {
 }
 
 // PriorityToString converts priority as an int to a string describing the name
-func PriorityToString(priority int) string {
-	return PriorityNames[priority]
-}
+//func PriorityToString(priority int) string {
+//	return PriorityNames[priority]
+//}
 
 // ParseSLAConfig takes an array of SLA from the configuration and converts
 // it to an array of SLAEntry structs
@@ -73,11 +73,7 @@ func checkSLAHours(incident Incident, hours int) bool {
 	duration, _ := time.ParseDuration(fmt.Sprintf("%dh", hours))
 	target := incident.CreatedAt.Add(duration)
 	if incident.CorrectedTime != "" {
-		correctedDuration, err := time.ParseDuration(incident.CorrectedTime)
-		if err != nil {
-			log.Fatalf("Error parsing corrected duration for incident %s: %v", incident.ID, err)
-		}
-		incident.CorrectedSolved = incident.CreatedAt.Add(correctedDuration)
+		incident.CorrectedSolved = incident.CreatedAt.Add(incident.CorrectedOpenTime)
 		return target.After(incident.CorrectedSolved)
 	}
 	return target.After(incident.SolvedAt)

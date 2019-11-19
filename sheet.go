@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Sheet is a struct containing the filename and the excelize.File
@@ -18,10 +19,6 @@ func (sheet *Sheet) init() {
 	sheet.file = excelize.NewFile()
 }
 
-func (sheet *Sheet) wop() {
-	fmt.Println("wop")
-}
-
 func (sheet *Sheet) setupOverviewSheet(area string) {
 	xls := sheet.file
 	if area == "" {
@@ -30,8 +27,6 @@ func (sheet *Sheet) setupOverviewSheet(area string) {
 		area = " " + area
 		xls.SetActiveSheet(xls.NewSheet("Overview" + area))
 	}
-
-	//xls.DeleteSheet("Sheet1")
 
 	percentStyle, _ := xls.NewStyle(`{"number_format": 9}`)
 
@@ -113,13 +108,15 @@ func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 	_ = xls.SetCellStr("Incidents", "F1", "Exclude")
 	_ = xls.SetCellStr("Incidents", "G1", "Priority")
 	_ = xls.SetCellStr("Incidents", "H1", "Product Category")
-	_ = xls.SetCellStr("Incidents", "I1", "Service CI")
-	_ = xls.SetCellStr("Incidents", "J1", "Business Area")
-	_ = xls.SetCellStr("Incidents", "K1", "SLA Met")
-	_ = xls.SetCellStr("Incidents", "L1", "Description")
-	_ = xls.SetCellStr("Incidents", "M1", "Resolution")
+	_ = xls.SetCellStr("Incidents", "I1", "Service")
+	_ = xls.SetCellStr("Incidents", "J1", "Service CI")
+	_ = xls.SetCellStr("Incidents", "K1", "Business Area")
+	_ = xls.SetCellStr("Incidents", "L1", "SLA Met")
+	_ = xls.SetCellStr("Incidents", "M1", "Description")
+	_ = xls.SetCellStr("Incidents", "N1", "Resolution")
 
 	maxProdLen := 1
+	maxSvcLen := 1
 	maxCILen := 1
 	maxDescLen := 1
 	maxResLen := 1
@@ -137,17 +134,21 @@ func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 		_ = xls.SetCellValue("Incidents", "F"+rowStr, incident.Exclude)
 		_ = xls.SetCellValue("Incidents", "G"+rowStr, PriorityNames[incident.Priority])
 		_ = xls.SetCellValue("Incidents", "H"+rowStr, incident.ProdCategory)
-		_ = xls.SetCellValue("Incidents", "I"+rowStr, incident.ServiceCI)
-		_ = xls.SetCellValue("Incidents", "J"+rowStr, incident.BusinessArea)
-		_ = xls.SetCellValue("Incidents", "K"+rowStr, incident.SLAMet)
-		_ = xls.SetCellValue("Incidents", "L"+rowStr, incident.Description)
-		_ = xls.SetCellValue("Incidents", "M"+rowStr, incident.Resolution)
+		_ = xls.SetCellValue("Incidents", "I"+rowStr, incident.Service)
+		_ = xls.SetCellValue("Incidents", "J"+rowStr, incident.ServiceCI)
+		_ = xls.SetCellValue("Incidents", "K"+rowStr, incident.BusinessArea)
+		_ = xls.SetCellValue("Incidents", "L"+rowStr, incident.SLAMet)
+		_ = xls.SetCellValue("Incidents", "M"+rowStr, incident.Description)
+		_ = xls.SetCellValue("Incidents", "N"+rowStr, incident.Resolution)
 
 		if len(incident.ProdCategory) > maxProdLen {
 			maxProdLen = len(incident.ProdCategory)
 		}
 		if len(incident.ServiceCI) > maxCILen {
 			maxCILen = len(incident.ServiceCI)
+		}
+		if len(incident.Service) > maxSvcLen {
+			maxSvcLen = len(incident.Service)
 		}
 		if len(incident.Description) > maxDescLen {
 			maxDescLen = len(incident.Description)
@@ -161,9 +162,10 @@ func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 	_ = xls.SetColWidth("Incidents", "B", "B", 16.0)
 	_ = xls.SetColWidth("Incidents", "C", "C", 16.0)
 	_ = xls.SetColWidth("Incidents", "H", "H", 0.9*float64(maxProdLen))
-	_ = xls.SetColWidth("Incidents", "I", "I", 0.9*float64(maxCILen))
-	_ = xls.SetColWidth("Incidents", "L", "L", 0.9*float64(maxDescLen))
-	_ = xls.SetColWidth("Incidents", "M", "M", 0.9*float64(maxResLen))
+	_ = xls.SetColWidth("Incidents", "I", "I", 0.9*float64(maxSvcLen))
+	_ = xls.SetColWidth("Incidents", "J", "J", 0.9*float64(maxCILen))
+	_ = xls.SetColWidth("Incidents", "M", "M", 0.9*float64(maxDescLen))
+	_ = xls.SetColWidth("Incidents", "N", "N", 0.9*float64(maxResLen))
 
 	rowStr := strconv.Itoa(len(incidents) + 1)
 	_ = xls.AutoFilter("Incidents", "A1", "M"+rowStr, "")
@@ -251,10 +253,14 @@ func ProcessReferenceFile(incidents []Incident, referenceFilename string) []Inci
 		// column 4 contains the potentially updated outage time in minutes
 		// if it is not 0, copy the value to our incidents list
 		// if the index equals -1, the incident row could not be found
-		if row[4] != "0" {
+		if row[4] != "" {
 			idx := findIncidentByID(incidents, row[0])
 			if idx != -1 {
 				incidents[idx].CorrectedTime = row[4]
+				incidents[idx].CorrectedOpenTime, err = time.ParseDuration(row[4])
+				if err != nil {
+					log.Fatalf("Error parsing corrected time '%s' for incident %s: %v", row[4], row[0], err)
+				}
 			}
 		}
 

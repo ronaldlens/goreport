@@ -1,6 +1,8 @@
 package main
 
-import "time"
+import (
+	"time"
+)
 
 // ServiceAvailability is a map of float arrays
 // the key (string) contains the service and the list the vluaes for the months
@@ -28,27 +30,35 @@ func calculateSA(incidents Incidents, services []string, period ReportPeriod) Se
 	month := period.startMonth
 	year := period.startYear
 
+	criticalIncidents := incidents.filterByPriority(Critical)
+
 	result := make(ServiceAvailability)
 
 	// go through the months until the endMonth & Year is reached
 	for {
 		totMinutes := getMinutesInMonth(month, year)
 
-		monthIncidents := incidents.filterByMonthYear(month, year)
-		outageMinutes := 0
+		monthIncidents := criticalIncidents.filterByMonthYear(month, year)
 
 		for _, service := range services {
+			outageMinutes := 0
+
 			// go through incidents for a service in this month to get the outage minutes
 			serviceIncidents := monthIncidents.filterByService(service)
 			for _, incident := range serviceIncidents {
 				if incident.SLAReady {
-					outageMinutes += incident.OpenTime
+					if incident.CorrectedTime == "" {
+						outageMinutes += incident.OpenTime
+					} else {
+						//
+					}
 				}
 			}
 
 			availability := float64(totMinutes-outageMinutes) / float64(totMinutes)
 
 			result[service] = append(result[service], availability)
+
 		}
 
 		if month == period.endMonth && year == period.endYear {
