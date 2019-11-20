@@ -50,7 +50,7 @@ func calculateSA(incidents Incidents, services []string, period ReportPeriod) Se
 					if incident.CorrectedTime == "" {
 						outageMinutes += incident.OpenTime
 					} else {
-						//
+						// TODO process corrected time
 					}
 				}
 			}

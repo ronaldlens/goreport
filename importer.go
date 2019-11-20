@@ -11,13 +11,17 @@ import (
 	"time"
 )
 
-func importIncidents(filename string) (Incidents, error) {
+// ImportIncidents reads the file with the name as the argument.
+// The file is a UTF-16 tab-delimited file containing the records with incidents
+// It returns a slice with the incidents or an error
+func ImportIncidents(filename string) (Incidents, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		log.Printf("Trying to open %s: %v", filename, err)
 		return nil, err
 	}
 
+	// read the UTF-16 file
 	scanner := bufio.NewScanner(transform.NewReader(
 		file, unicode.UTF16(unicode.LittleEndian, unicode.UseBOM).NewDecoder()))
 
@@ -30,6 +34,7 @@ func importIncidents(filename string) (Incidents, error) {
 		return nil, err
 	}
 
+	// loop through the lines reading the incidents
 	var incidents []Incident
 	for scanner.Scan() {
 		parts := strings.Split(scanner.Text(), "\t")
@@ -76,6 +81,9 @@ func importIncidents(filename string) (Incidents, error) {
 	return incidents, nil
 }
 
+// map the headers to their position, this allows the source file to change layout without breaking
+// the loading of incidents
+// the fields are hardcoded in the list requiredFields.
 func parseHeaders(headerParts []string) (map[string]int, error) {
 	requiredFields := []string{
 		"Country",

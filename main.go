@@ -12,7 +12,7 @@ func main() {
 	processCommandLineArgs()
 
 	// load the incidents
-	incidents, err := importIncidents(flagVars.inputFilename)
+	incidents, err := ImportIncidents(flagVars.inputFilename)
 	if err != nil {
 		log.Fatalf("Error importing %s: %v", flagVars.inputFilename, err)
 	}

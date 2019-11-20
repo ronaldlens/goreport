@@ -68,55 +68,64 @@ func processCommandLineArgs() {
 func processCommandLineCommand(incidents Incidents) {
 	// work through commands
 	if hasCommand("list") {
-		if hasNoun("countries") {
-			if flagVars.verbose {
-				log.Printf("Listing all countries")
-			}
-			listCountries(incidents)
-		} else if hasNoun("prodcategories") {
-			if flagVars.country != "" {
-				if flagVars.verbose {
-					log.Printf("Filtering by country %s", flagVars.country)
-				}
-				incidents = incidents.filterByCountry(flagVars.country)
-			}
-			listProductCategories(incidents)
-		} else if hasNoun("services") {
-			if flagVars.country != "" {
-				if flagVars.verbose {
-					log.Printf("Filtering by country %s", flagVars.country)
-				}
-				incidents = incidents.filterByCountry(flagVars.country)
-			}
-			listServices(incidents)
-		}
+		runListCommand(incidents)
 	} else if hasCommand("report") {
-		// reduce incidents
-		countryConfig := getCountryFromConfig(config, flagVars.country)
-		incidents = incidents.filterByCountry(flagVars.country)
-		incidents = incidents.filterOutProdCategories(countryConfig.FilterOutCategories)
-
-		// if we are to use a reference xlsx, process it
-		// if the name equals to 'same' use the same name as the output
-		// if the name equals to 'previous' or 'prev' use the xlsx from last month
-		if flagVars.referenceFilename != "" {
-			if flagVars.referenceFilename == "same" {
-				flagVars.referenceFilename = getFilename(flagVars.country, flagVars.month, flagVars.year)
-			} else if flagVars.referenceFilename == "previous" || flagVars.referenceFilename == "prev" {
-				prevMonth, prevYear := getPreviousMonth(flagVars.month, flagVars.year)
-				flagVars.referenceFilename = getFilename(flagVars.country, prevMonth, prevYear)
-			}
-			incidents = ProcessReferenceFile(incidents, flagVars.referenceFilename)
-		}
-
-		slaSet := ParseSLAConfig(countryConfig.SLAs)
-		incidents = checkIncidentsAgainstSLA(incidents, slaSet)
-		runReport(&incidents, flagVars.country, flagVars.month, flagVars.year, countryConfig.SplitArea, flagVars.outputFilename, countryConfig.MinimumIncidents, flagVars.verbose)
+		runReportCommand(incidents)
 	} else if hasCommand("gui") {
 		RunGui(incidents)
 	} else {
 		log.Fatalf("No command specified")
 	}
+}
+
+func runListCommand(incidents Incidents) {
+	if hasNoun("countries") {
+		if flagVars.verbose {
+			log.Printf("Listing all countries")
+		}
+		listCountries(incidents)
+	} else if hasNoun("prodcategories") {
+		if flagVars.country != "" {
+			if flagVars.verbose {
+				log.Printf("Filtering by country %s", flagVars.country)
+			}
+			incidents = incidents.filterByCountry(flagVars.country)
+		}
+		listProductCategories(incidents)
+	} else if hasNoun("services") {
+		if flagVars.country != "" {
+			if flagVars.verbose {
+				log.Printf("Filtering by country %s", flagVars.country)
+			}
+			incidents = incidents.filterByCountry(flagVars.country)
+		}
+		listServices(incidents)
+	}
+}
+
+func runReportCommand(incidents Incidents) {
+	// reduce incidents
+	countryConfig := getCountryFromConfig(config, flagVars.country)
+	incidents = incidents.filterByCountry(flagVars.country)
+	incidents = incidents.filterOutProdCategories(countryConfig.FilterOutCategories)
+
+	// if we are to use a reference xlsx, process it
+	// if the name equals to 'same' use the same name as the output
+	// if the name equals to 'previous' or 'prev' use the xlsx from last month
+	if flagVars.referenceFilename != "" {
+		if flagVars.referenceFilename == "same" {
+			flagVars.referenceFilename = getFilename(flagVars.country, flagVars.month, flagVars.year)
+		} else if flagVars.referenceFilename == "previous" || flagVars.referenceFilename == "prev" {
+			prevMonth, prevYear := getPreviousMonth(flagVars.month, flagVars.year)
+			flagVars.referenceFilename = getFilename(flagVars.country, prevMonth, prevYear)
+		}
+		incidents = ProcessReferenceFile(incidents, flagVars.referenceFilename)
+	}
+
+	slaSet := ParseSLAConfig(countryConfig.SLAs)
+	incidents = checkIncidentsAgainstSLA(incidents, slaSet)
+	runReport(&incidents, flagVars.country, flagVars.month, flagVars.year, countryConfig.SplitArea,
+		flagVars.outputFilename, countryConfig.MinimumIncidents, flagVars.verbose)
 }
 
 // check if the command line contains a specific command (verb)
@@ -151,5 +160,4 @@ func hasNoun(noun string) bool {
 
 	// check if command is given
 	return flag.Args()[1] == noun
-
 }

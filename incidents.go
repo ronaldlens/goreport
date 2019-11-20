@@ -25,9 +25,9 @@ type Incident struct {
 	SLAReady          bool
 	SLAMet            bool
 	OpenTime          int
-	CorrectedTime     string
-	CorrectedSolved   time.Time
-	CorrectedOpenTime time.Duration
+	CorrectedTime     string        // corrected time in string format
+	CorrectedSolved   time.Time     // the new corrected solved time
+	CorrectedOpenTime time.Duration // the open time as duration
 	Exclude           bool
 }
 
@@ -240,6 +240,7 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 	// Service availability
 	if area == " IT" {
 
+		// define the period, starting 6 months back from the reporting month
 		startMonth, startYear := subtractMonths(month, year, 6)
 		period := ReportPeriod{
 			startMonth: startMonth,
@@ -248,15 +249,20 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 			endYear:    year,
 		}
 
+		// calculate the availability
 		itAvailability := calculateSA(sixMonthIncidents, ITServicesNames, period)
+
+		// used to get the name of the month
 		monthIdx := startMonth
 
+		// set up the table
 		axis, _ := excelize.CoordinatesToCellName(1, 23)
 		_ = xls.SetCellStr("Overview"+area, axis, "IT Service Availability")
 		axis, _ = excelize.CoordinatesToCellName(2, 24)
 		_ = xls.SetCellStr("Overview"+area, axis, "Target")
 		_ = xls.SetColWidth("Overview"+area, "A", "A", 16.22)
 
+		// loop through all services to set the name and the target percentage
 		for idx, service := range ITServicesNames {
 			axis, _ := excelize.CoordinatesToCellName(1, 25+idx)
 			_ = xls.SetCellStr("Overview"+area, axis, service)
@@ -265,6 +271,7 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 			_ = xls.SetCellStyle("Overview"+area, axis, axis, percentStyle2)
 		}
 
+		// loop through the 6 months of the report
 		for idx := 0; idx < 6; idx++ {
 			axis, _ := excelize.CoordinatesToCellName(3+idx, 24)
 			_ = xls.SetCellStr("Overview"+area, axis, MonthNames[monthIdx])
@@ -279,12 +286,15 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 					_ = xls.SetCellStyle("Overview"+area, axis, axis, greenStyle2)
 				}
 			}
+
+			// increment month and check for year end rollover
 			monthIdx++
 			if monthIdx == 13 {
 				monthIdx = 1
 			}
 		}
 	}
+
 	return sixMonthIncidents
 }
 
