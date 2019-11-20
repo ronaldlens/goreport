@@ -45,6 +45,11 @@ func importIncidents(filename string) (Incidents, error) {
 			Priority:     StringToPriority(parts[headers["Priority"]]),
 		}
 
+		// USMS is logged under service 'other'?
+		if inc.ServiceCI == "Remedy USMS PROD Corp" {
+			inc.Service = "Service Assurance"
+		}
+
 		// get timestamps, createdAt and solvedAt
 		// solvedAt may not be filled in (yet), if so, don't use it for SLA calculations
 		t, err := parseTimeStamp(parts[headers["Create DateTime"]])

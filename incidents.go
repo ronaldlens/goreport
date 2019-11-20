@@ -127,10 +127,12 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 	if area != "" {
 		area = " " + area
 	}
-	percentStyle, _ := xls.NewStyle(`{"number_format": 9}`)
+	//percentStyle, _ := xls.NewStyle(`{"number_format": 9}`)
 	percentStyle2, _ := xls.NewStyle(`{"number_format": 10}`)
-	greenStyle, _ := xls.NewStyle(`{"fill":{"type":"pattern","color":["#00FF00"],"pattern":1},"number_format": 10, "alignment":{"horizontal":"center"}}`)
-	redStyle, _ := xls.NewStyle(`{"fill":{"type":"pattern","color":["#FF0000"],"pattern":1},"number_format": 10,"alignment":{"horizontal":"center"},"font":{"color":"#FFFFFF"}}`)
+	greenStyle, _ := xls.NewStyle(`{"fill":{"type":"pattern","color":["#00FF00"],"pattern":1},"number_format": 9, "alignment":{"horizontal":"center"}}`)
+	redStyle, _ := xls.NewStyle(`{"fill":{"type":"pattern","color":["#FF0000"],"pattern":1},"number_format": 9,"alignment":{"horizontal":"center"},"font":{"color":"#FFFFFF"}}`)
+	greenStyle2, _ := xls.NewStyle(`{"fill":{"type":"pattern","color":["#00FF00"],"pattern":1},"number_format": 10, "alignment":{"horizontal":"center"}}`)
+	redStyle2, _ := xls.NewStyle(`{"fill":{"type":"pattern","color":["#FF0000"],"pattern":1},"number_format": 10,"alignment":{"horizontal":"center"},"font":{"color":"#FFFFFF"}}`)
 
 	// to collect incidents for 'Incidents' tab, contains all incidents for 6 months
 	var sixMonthIncidents Incidents
@@ -224,56 +226,63 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 			if calcTotalIncidents[index][priority] != 0 {
 				percentage := float64(calcSLAMetIncidents[index][priority]) / float64(calcTotalIncidents[index][priority])
 				axis, _ = excelize.CoordinatesToCellName(3+index, 18+priority)
-				_ = xls.SetCellFloat("Overview"+area, axis, percentage, 1, 64)
-				_ = xls.SetCellStyle("Overview"+area, axis, axis, percentStyle)
+				_ = xls.SetCellFloat("Overview"+area, axis, percentage, 3, 64)
+				if percentage < 0.8 {
+					_ = xls.SetCellStyle("Overview"+area, axis, axis, redStyle)
+				} else {
+					_ = xls.SetCellStyle("Overview"+area, axis, axis, greenStyle)
+				}
 			}
 		}
 		month, year = getNextMonth(month, year)
 	}
 
 	// Service availability
+	if area == " IT" {
 
-	startMonth, startYear := subtractMonths(month, year, 6)
-	period := ReportPeriod{
-		startMonth: startMonth,
-		startYear:  startYear,
-		endMonth:   month,
-		endYear:    year,
-	}
-
-	itAvailability := calculateSA(sixMonthIncidents, ITServicesNames, period)
-	monthIdx := startMonth
-
-	axis, _ := excelize.CoordinatesToCellName(1, 23)
-	_ = xls.SetCellStr("Overview"+area, axis, "IT Service Availability")
-	axis, _ = excelize.CoordinatesToCellName(2, 24)
-	_ = xls.SetCellStr("Overview"+area, axis, "Target")
-
-	for idx, service := range ITServicesNames {
-		axis, _ := excelize.CoordinatesToCellName(1, 25+idx)
-		_ = xls.SetCellStr("Overview"+area, axis, service)
-		axis, _ = excelize.CoordinatesToCellName(2, 25+idx)
-		_ = xls.SetCellFloat("Overview"+area, axis, 0.995, 3, 64)
-		_ = xls.SetCellStyle("Overview"+area, axis, axis, percentStyle2)
-	}
-
-	for idx := 0; idx < 6; idx++ {
-		axis, _ := excelize.CoordinatesToCellName(3+idx, 24)
-		_ = xls.SetCellStr("Overview"+area, axis, MonthNames[monthIdx])
-		for serviceIdx, service := range ITServicesNames {
-			value := itAvailability[service][idx]
-			axis, _ := excelize.CoordinatesToCellName(3+idx, 25+serviceIdx)
-			_ = xls.SetCellFloat("Overview"+area, axis, value, 3, 64)
-			_ = xls.SetCellStyle("Overview"+area, axis, axis, percentStyle2)
-			if value < 0.995 {
-				_ = xls.SetCellStyle("Overview"+area, axis, axis, redStyle)
-			} else {
-				_ = xls.SetCellStyle("Overview"+area, axis, axis, greenStyle)
-			}
+		startMonth, startYear := subtractMonths(month, year, 6)
+		period := ReportPeriod{
+			startMonth: startMonth,
+			startYear:  startYear,
+			endMonth:   month,
+			endYear:    year,
 		}
-		monthIdx++
-		if monthIdx == 13 {
-			monthIdx = 1
+
+		itAvailability := calculateSA(sixMonthIncidents, ITServicesNames, period)
+		monthIdx := startMonth
+
+		axis, _ := excelize.CoordinatesToCellName(1, 23)
+		_ = xls.SetCellStr("Overview"+area, axis, "IT Service Availability")
+		axis, _ = excelize.CoordinatesToCellName(2, 24)
+		_ = xls.SetCellStr("Overview"+area, axis, "Target")
+		_ = xls.SetColWidth("Overview"+area, "A", "A", 16.22)
+
+		for idx, service := range ITServicesNames {
+			axis, _ := excelize.CoordinatesToCellName(1, 25+idx)
+			_ = xls.SetCellStr("Overview"+area, axis, service)
+			axis, _ = excelize.CoordinatesToCellName(2, 25+idx)
+			_ = xls.SetCellFloat("Overview"+area, axis, 0.995, 3, 64)
+			_ = xls.SetCellStyle("Overview"+area, axis, axis, percentStyle2)
+		}
+
+		for idx := 0; idx < 6; idx++ {
+			axis, _ := excelize.CoordinatesToCellName(3+idx, 24)
+			_ = xls.SetCellStr("Overview"+area, axis, MonthNames[monthIdx])
+			for serviceIdx, service := range ITServicesNames {
+				value := itAvailability[service][idx]
+				axis, _ := excelize.CoordinatesToCellName(3+idx, 25+serviceIdx)
+				_ = xls.SetCellFloat("Overview"+area, axis, value, 3, 64)
+				_ = xls.SetCellStyle("Overview"+area, axis, axis, percentStyle2)
+				if value < 0.995 {
+					_ = xls.SetCellStyle("Overview"+area, axis, axis, redStyle2)
+				} else {
+					_ = xls.SetCellStyle("Overview"+area, axis, axis, greenStyle2)
+				}
+			}
+			monthIdx++
+			if monthIdx == 13 {
+				monthIdx = 1
+			}
 		}
 	}
 	return sixMonthIncidents

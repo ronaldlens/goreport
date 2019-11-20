@@ -98,6 +98,10 @@ func (sheet *Sheet) addProdCategoriesToSheet(incidents Incidents) {
 func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 	xls := sheet.file
 	xls.SetActiveSheet(xls.NewSheet("Incidents"))
+	urlPrefix := "http://usms.upc.biz/arsys/forms/appusms/SHR%%3ALandingConsole/Default+Administrator+View/" +
+		"?mode=search&F304255500=HPD%%3AHelp+Desk&F1000000076=FormOpenNoAppList&F303647600=" +
+		"SearchTicketWithQual&F304255610='1000000161'%%3D%%22%s%%22"
+	urlStyle, _ := xls.NewStyle(`{"font":{"color":"#1265BE","underline":"single"}}`)
 
 	// setup the header row
 	_ = xls.SetCellStr("Incidents", "A1", "ID")
@@ -125,6 +129,10 @@ func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 		rowStr := strconv.Itoa(row + 2)
 
 		_ = xls.SetCellValue("Incidents", "A"+rowStr, incident.ID)
+		url := fmt.Sprintf(urlPrefix, incident.ID)
+		_ = xls.SetCellHyperLink("Incidents", "A"+rowStr, url, "External")
+		_ = xls.SetCellStyle("Incidents", "A"+rowStr, "A"+rowStr, urlStyle)
+
 		_ = xls.SetCellValue("Incidents", "B"+rowStr, incident.CreatedAt)
 		if incident.SLAReady {
 			_ = xls.SetCellValue("Incidents", "C"+rowStr, incident.SolvedAt)
