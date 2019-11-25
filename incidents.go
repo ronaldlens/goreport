@@ -33,14 +33,27 @@ type Incident struct {
 
 func (incidents *Incidents) filterOutProdCategories(categories []string) Incidents {
 	var result []Incident
-OuterLoop:
+
+	// return unfiltered list if the argument nofilter was supplied
+	if flagVars.nofilter {
+		return *incidents
+	}
+
+	categoryMap := make(map[string]int)
+	for _, category := range categories {
+		categoryMap[category] = 1
+	}
+
 	for _, incident := range *incidents {
-		for _, category := range categories {
-			if strings.Contains(incident.ProdCategory, category) {
-				continue OuterLoop
+		if flagVars.reverse {
+			if categoryMap[incident.ProdCategory] == 1 {
+				result = append(result, incident)
+			}
+		} else {
+			if categoryMap[incident.ProdCategory] != 1 {
+				result = append(result, incident)
 			}
 		}
-		result = append(result, incident)
 	}
 	return result
 }
@@ -238,7 +251,7 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 	}
 
 	// Service availability
-	if area == " IT" {
+	if area == " IT" || area == "" {
 
 		// define the period, starting 6 months back from the reporting month
 		startMonth, startYear := subtractMonths(month, year, 6)

@@ -18,6 +18,8 @@ var flagVars struct {
 	year              int
 	now               bool
 	verbose           bool
+	reverse           bool
+	nofilter          bool
 }
 
 var config Config
@@ -35,6 +37,8 @@ func init() {
 	flag.BoolVar(&flagVars.now, "now", false, "Use current month instead of last month")
 
 	flag.BoolVar(&flagVars.verbose, "v", false, "Increased verbosity")
+	flag.BoolVar(&flagVars.reverse, "reverse", false, "Apply the filters for incidents in reverse")
+	flag.BoolVar(&flagVars.nofilter, "nofilter", false, "Do not apply any filter to incidents")
 
 }
 
