@@ -1,6 +1,14 @@
 # goreport
 
-Report handler to process ITSM data into country specific reports
+Report handler to process ITSM data into country specific reports. It reads 
+a UTF-16 tab-delimited and optionally another Excel file from which it then
+generates a new Excel file.
+
+# installation
+
+The program depends on the excellent Excelize library for reading and writing
+Excel files. Use `go get github.com/360EntSecGroup-Skylar/excelize` to install 
+it.
 
 # usage
 

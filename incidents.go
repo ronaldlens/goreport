@@ -262,8 +262,8 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 			endYear:    year,
 		}
 
-		// calculate the availability
-		itAvailability := calculateSA(sixMonthIncidents, ITServicesNames, period)
+		// calculate the availability, use all incidents to allow going back one more month
+		itAvailability := calculateSA(*incidents, ITServicesNames, period)
 
 		// used to get the name of the month
 		monthIdx := startMonth
@@ -309,6 +309,40 @@ func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, 
 	}
 
 	return sixMonthIncidents
+}
+
+// check if an incident is created in the previous month
+func (incident *Incident) isCreatedInPrevMonthYear(month int, year int) bool {
+	month, year = getPreviousMonth(month, year)
+	return incident.CreatedAt.Year() == year && int(incident.CreatedAt.Month()) == month
+}
+
+// check if an incident is resolved in a specific month
+func (incident *Incident) isResolvedInMonthYear(month int, year int) bool {
+	var resolvedTime time.Time
+	if incident.CorrectedTime != "" {
+		resolvedTime = incident.CorrectedSolved
+	} else {
+		resolvedTime = incident.SolvedAt
+	}
+	return resolvedTime.Year() == year && int(resolvedTime.Month()) == month
+}
+
+func (incident *Incident) getOutageMinutesInMonth(month int, year int) int {
+	if !incident.isResolvedInMonthYear(month, year) {
+		return 0
+	}
+
+	// if incident is created in the previous month we need to do some math
+	if incident.isCreatedInPrevMonthYear(month, year) {
+
+	} else {
+
+	}
+
+	//TODO: implement getOutageMinutesInMonth
+	return 1
+
 }
 
 func getPreviousMonth(month int, year int) (int, int) {

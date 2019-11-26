@@ -25,6 +25,7 @@ func getMinutesInMonth(month int, year int) int {
 	return time.Date(year, time.Month(month), 0, 0, 0, 0, 0, time.UTC).Day() * 24 * 60
 }
 
+// TODO: take out service window
 func calculateSA(incidents Incidents, services []string, period ReportPeriod) ServiceAvailability {
 	// start at the beginning
 	month := period.startMonth
@@ -40,10 +41,21 @@ func calculateSA(incidents Incidents, services []string, period ReportPeriod) Se
 
 		monthIncidents := criticalIncidents.filterByMonthYear(month, year)
 
+		// get incidents from previous months to see if there're incidents that roll over into the current month
+		prevMonth, prevYear := getPreviousMonth(month, year)
+		prevMonthIncidents := criticalIncidents.filterByMonthYear(prevMonth, prevYear)
+		for _, incident := range prevMonthIncidents {
+			if incident.isResolvedInMonthYear(month, year) {
+				monthIncidents = append(monthIncidents, incident)
+			}
+		}
+
 		for _, service := range services {
 			outageMinutes := 0
 
 			// go through incidents for a service in this month to get the outage minutes
+			//TODO: use only outage minutes in this month from last months incidents
+			//TODO: count each outage minute for a given service only once (overlapping outages)
 			serviceIncidents := monthIncidents.filterByService(service)
 			for _, incident := range serviceIncidents {
 				if incident.SLAReady {
