@@ -5,9 +5,9 @@ import (
 )
 
 func TestIncidents_filterOutProdCategories(t *testing.T) {
-	i1 := Incident{ID: "1", ProdCategory: "foo"}
-	i2 := Incident{ID: "2", ProdCategory: "foo"}
-	i3 := Incident{ID: "3", ProdCategory: "bar"}
+	i1 := Incident{ID: "1", ProdCategory2: "foo"}
+	i2 := Incident{ID: "2", ProdCategory2: "foo"}
+	i3 := Incident{ID: "3", ProdCategory2: "bar"}
 
 	incidents := Incidents{i1, i2, i3}
 	prodCategories := []string{"bar"}

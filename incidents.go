@@ -9,6 +9,7 @@ import (
 // Incidents type contains and array of Incident
 type Incidents []Incident
 
+//TODO: add product category 1
 // Incident struct described an incident
 type Incident struct {
 	Country           string
@@ -19,7 +20,8 @@ type Incident struct {
 	Description       string
 	Resolution        string
 	Service           string
-	ProdCategory      string
+	ProdCategory1     string
+	ProdCategory2     string
 	ServiceCI         string
 	BusinessArea      string
 	SLAReady          bool
@@ -46,11 +48,11 @@ func (incidents *Incidents) filterOutProdCategories(categories []string) Inciden
 
 	for _, incident := range *incidents {
 		if flagVars.reverse {
-			if categoryMap[incident.ProdCategory] == 1 {
+			if categoryMap[incident.ProdCategory2] == 1 {
 				result = append(result, incident)
 			}
 		} else {
-			if categoryMap[incident.ProdCategory] != 1 {
+			if categoryMap[incident.ProdCategory2] != 1 {
 				result = append(result, incident)
 			}
 		}
@@ -111,10 +113,10 @@ func (incidents *Incidents) filterByService(service string) Incidents {
 func (incidents *Incidents) collectProdCategories() map[string]ProdCategory {
 	prodCategories := make(map[string]ProdCategory)
 	for _, incident := range *incidents {
-		category, found := prodCategories[incident.ProdCategory]
+		category, found := prodCategories[incident.ProdCategory2]
 		if !found {
 			category = ProdCategory{}
-			prodCategories[incident.ProdCategory] = category
+			prodCategories[incident.ProdCategory2] = category
 		}
 		category.Total++
 		if incident.SLAMet {
@@ -130,7 +132,7 @@ func (incidents *Incidents) collectProdCategories() map[string]ProdCategory {
 		case Low:
 			category.Low++
 		}
-		prodCategories[incident.ProdCategory] = category
+		prodCategories[incident.ProdCategory2] = category
 	}
 	return prodCategories
 }

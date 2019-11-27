@@ -17,7 +17,7 @@ func listCountries(incidents []Incident) {
 func listProductCategories(incidents []Incident) {
 	categories := make(map[string]int)
 	for _, incident := range incidents {
-		categories[incident.ProdCategory] = 1
+		categories[incident.ProdCategory2] = 1
 	}
 
 	for category := range categories {

@@ -38,7 +38,7 @@ var NWServiceNames = []string{
 	"Horizon GO",
 }
 
-// ProdCategory is a struct describing a row in the product category tab
+// ProdCategory2 is a struct describing a row in the product category tab
 type ProdCategory struct {
 	Total    int
 	Critical int

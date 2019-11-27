@@ -111,15 +111,17 @@ func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 	_ = xls.SetCellStr("Incidents", "E1", "Corrected Open")
 	_ = xls.SetCellStr("Incidents", "F1", "Exclude")
 	_ = xls.SetCellStr("Incidents", "G1", "Priority")
-	_ = xls.SetCellStr("Incidents", "H1", "Product Category")
-	_ = xls.SetCellStr("Incidents", "I1", "Service")
-	_ = xls.SetCellStr("Incidents", "J1", "Service CI")
-	_ = xls.SetCellStr("Incidents", "K1", "Business Area")
-	_ = xls.SetCellStr("Incidents", "L1", "SLA Met")
-	_ = xls.SetCellStr("Incidents", "M1", "Description")
-	_ = xls.SetCellStr("Incidents", "N1", "Resolution")
+	_ = xls.SetCellStr("Incidents", "H1", "Product Category Tier 1")
+	_ = xls.SetCellStr("Incidents", "I1", "Product Category Tier 2")
+	_ = xls.SetCellStr("Incidents", "J1", "Service")
+	_ = xls.SetCellStr("Incidents", "K1", "Service CI")
+	_ = xls.SetCellStr("Incidents", "L1", "Business Area")
+	_ = xls.SetCellStr("Incidents", "M1", "SLA Met")
+	_ = xls.SetCellStr("Incidents", "N1", "Description")
+	_ = xls.SetCellStr("Incidents", "O1", "Resolution")
 
-	maxProdLen := 1
+	maxProdCat1Len := 1
+	maxProdCat2Len := 1
 	maxSvcLen := 1
 	maxCILen := 1
 	maxDescLen := 1
@@ -141,16 +143,20 @@ func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 		_ = xls.SetCellValue("Incidents", "E"+rowStr, incident.CorrectedTime)
 		_ = xls.SetCellValue("Incidents", "F"+rowStr, incident.Exclude)
 		_ = xls.SetCellValue("Incidents", "G"+rowStr, PriorityNames[incident.Priority])
-		_ = xls.SetCellValue("Incidents", "H"+rowStr, incident.ProdCategory)
-		_ = xls.SetCellValue("Incidents", "I"+rowStr, incident.Service)
-		_ = xls.SetCellValue("Incidents", "J"+rowStr, incident.ServiceCI)
-		_ = xls.SetCellValue("Incidents", "K"+rowStr, incident.BusinessArea)
-		_ = xls.SetCellValue("Incidents", "L"+rowStr, incident.SLAMet)
-		_ = xls.SetCellValue("Incidents", "M"+rowStr, incident.Description)
-		_ = xls.SetCellValue("Incidents", "N"+rowStr, incident.Resolution)
+		_ = xls.SetCellValue("Incidents", "H"+rowStr, incident.ProdCategory1)
+		_ = xls.SetCellValue("Incidents", "I"+rowStr, incident.ProdCategory2)
+		_ = xls.SetCellValue("Incidents", "J"+rowStr, incident.Service)
+		_ = xls.SetCellValue("Incidents", "K"+rowStr, incident.ServiceCI)
+		_ = xls.SetCellValue("Incidents", "L"+rowStr, incident.BusinessArea)
+		_ = xls.SetCellValue("Incidents", "M"+rowStr, incident.SLAMet)
+		_ = xls.SetCellValue("Incidents", "N"+rowStr, incident.Description)
+		_ = xls.SetCellValue("Incidents", "O"+rowStr, incident.Resolution)
 
-		if len(incident.ProdCategory) > maxProdLen {
-			maxProdLen = len(incident.ProdCategory)
+		if len(incident.ProdCategory1) > maxProdCat1Len {
+			maxProdCat1Len = len(incident.ProdCategory1)
+		}
+		if len(incident.ProdCategory2) > maxProdCat2Len {
+			maxProdCat2Len = len(incident.ProdCategory2)
 		}
 		if len(incident.ServiceCI) > maxCILen {
 			maxCILen = len(incident.ServiceCI)
@@ -169,11 +175,12 @@ func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 	_ = xls.SetColWidth("Incidents", "A", "A", 16.0)
 	_ = xls.SetColWidth("Incidents", "B", "B", 16.0)
 	_ = xls.SetColWidth("Incidents", "C", "C", 16.0)
-	_ = xls.SetColWidth("Incidents", "H", "H", 0.9*float64(maxProdLen))
-	_ = xls.SetColWidth("Incidents", "I", "I", 0.9*float64(maxSvcLen))
-	_ = xls.SetColWidth("Incidents", "J", "J", 0.9*float64(maxCILen))
-	_ = xls.SetColWidth("Incidents", "M", "M", 0.9*float64(maxDescLen))
-	_ = xls.SetColWidth("Incidents", "N", "N", 0.9*float64(maxResLen))
+	_ = xls.SetColWidth("Incidents", "H", "H", 0.9*float64(maxProdCat1Len))
+	_ = xls.SetColWidth("Incidents", "I", "I", 0.9*float64(maxProdCat2Len))
+	_ = xls.SetColWidth("Incidents", "J", "J", 0.9*float64(maxSvcLen))
+	_ = xls.SetColWidth("Incidents", "K", "K", 0.9*float64(maxCILen))
+	_ = xls.SetColWidth("Incidents", "N", "M", 0.9*float64(maxDescLen))
+	_ = xls.SetColWidth("Incidents", "O", "N", 0.9*float64(maxResLen))
 
 	rowStr := strconv.Itoa(len(incidents) + 1)
 	_ = xls.AutoFilter("Incidents", "A1", "M"+rowStr, "")

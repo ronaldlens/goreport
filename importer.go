@@ -39,15 +39,16 @@ func ImportIncidents(filename string) (Incidents, error) {
 	for scanner.Scan() {
 		parts := strings.Split(scanner.Text(), "\t")
 		var inc = Incident{
-			Country:      parts[headers["Country"]],
-			ID:           parts[headers["Incident Number"]],
-			Description:  parts[headers["Description"]],
-			Resolution:   parts[headers["Resolution Description"]],
-			ProdCategory: parts[headers["Product Categorization Tier2"]],
-			Service:      parts[headers["Service"]],
-			ServiceCI:    parts[headers["Service CI"]],
-			BusinessArea: parts[headers["Business area"]],
-			Priority:     StringToPriority(parts[headers["Priority"]]),
+			Country:       parts[headers["Country"]],
+			ID:            parts[headers["Incident Number"]],
+			Description:   parts[headers["Description"]],
+			Resolution:    parts[headers["Resolution Description"]],
+			ProdCategory1: parts[headers["Product Categorization Tier1"]],
+			ProdCategory2: parts[headers["Product Categorization Tier2"]],
+			Service:       parts[headers["Service"]],
+			ServiceCI:     parts[headers["Service CI"]],
+			BusinessArea:  parts[headers["Business area"]],
+			Priority:      StringToPriority(parts[headers["Priority"]]),
 		}
 
 		// USMS is logged under service 'other'?
@@ -91,6 +92,7 @@ func parseHeaders(headerParts []string) (map[string]int, error) {
 		"Create DateTime",
 		"Last Resolved DateTime",
 		"Priority",
+		"Product Categorization Tier1",
 		"Product Categorization Tier2",
 		"Service",
 		"Service CI",
