@@ -112,7 +112,6 @@ func runReportCommand(incidents Incidents) {
 	countryConfig := getCountryFromConfig(config, flagVars.country)
 	incidents = incidents.filterByCountry(flagVars.country)
 	//incidents = incidents.filterOutProdCategories2(countryConfig.FilterOutCategories)
-	//TODO: process local incidents
 	localIncidents := incidents.filterCorpLocal(false)
 	incidents = incidents.filterCorpLocal(true)
 

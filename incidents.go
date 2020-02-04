@@ -156,6 +156,22 @@ func (incidents *Incidents) collectProdCategories() map[string]ProdCategory {
 	return prodCategories
 }
 
+func (incidents *Incidents) getSixMonthsIncidents(month int, year int) Incidents {
+	var sixMonthIncidents Incidents
+
+	// start 6 months ago
+	month, year = subtractMonths(month, year, 5)
+
+	// repeat for 6 months
+	for index := 0; index < 6; index++ {
+		sixMonthIncidents = append(sixMonthIncidents, incidents.filterByMonthYear(month, year)...)
+		// advance month, check for year rollover
+		month, year = getNextMonth(month, year)
+	}
+
+	return sixMonthIncidents
+}
+
 func (incidents *Incidents) reportOnSixMonths(month int, year int, area string, sheet *Sheet, minimumIncidentsConfig MinimumIncidents) Incidents {
 	xls := sheet.file
 	if area != "" {

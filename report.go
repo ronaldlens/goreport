@@ -38,7 +38,7 @@ func runReport(incidents *Incidents, localIncidents *Incidents, country string, 
 
 	sheet.addProdCategoriesToSheet(totalIncidents)
 	sheet.addIncidentsToSheet(totalIncidents, "Incidents")
-	//sheet.addIncidentsToSheet(localIncidents, "Local Incidents")
+	sheet.addIncidentsToSheet(localIncidents.getSixMonthsIncidents(month, year), "Local Incidents")
 	if outputDirectory != "" {
 		outputFilename = filepath.Join(outputDirectory, outputFilename)
 
