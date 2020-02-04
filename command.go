@@ -111,7 +111,10 @@ func runReportCommand(incidents Incidents) {
 	// reduce incidents
 	countryConfig := getCountryFromConfig(config, flagVars.country)
 	incidents = incidents.filterByCountry(flagVars.country)
-	incidents = incidents.filterOutProdCategories(countryConfig.FilterOutCategories)
+	//incidents = incidents.filterOutProdCategories(countryConfig.FilterOutCategories)
+	//TODO: process local incidents
+	//localIncidents := incidents.filterCorpLocal(false)
+	incidents = incidents.filterCorpLocal(true)
 
 	// if we are to use a reference xlsx, process it
 	// if the name equals to 'same' use the same name as the output
@@ -129,7 +132,7 @@ func runReportCommand(incidents Incidents) {
 	slaSet := ParseSLAConfig(countryConfig.SLAs)
 	incidents = checkIncidentsAgainstSLA(incidents, slaSet)
 	runReport(&incidents, flagVars.country, flagVars.month, flagVars.year, countryConfig.SplitArea,
-		flagVars.outputFilename, countryConfig.MinimumIncidents, flagVars.verbose)
+		flagVars.outputFilename, countryConfig.MinimumIncidents, flagVars.verbose, config.OutputDirectory)
 }
 
 // check if the command line contains a specific command (verb)

@@ -1,8 +1,12 @@
 package main
 
-import "log"
+import (
+	"log"
+	"path/filepath"
+)
 
-func runReport(incidents *Incidents, country string, month int, year int, splitArea bool, outputFilename string, minimumIncidents MinimumIncidents, verbose bool) {
+func runReport(incidents *Incidents, country string, month int, year int, splitArea bool,
+	outputFilename string, minimumIncidents MinimumIncidents, verbose bool, outputDirectory string) {
 
 	if outputFilename == "" {
 		outputFilename = getFilename(country, month, year)
@@ -34,6 +38,10 @@ func runReport(incidents *Incidents, country string, month int, year int, splitA
 	sheet.addProdCategoriesToSheet(totalIncidents)
 	sheet.addIncidentsToSheet(totalIncidents)
 
+	if outputDirectory != "" {
+		outputFilename = filepath.Join(outputDirectory, outputFilename)
+
+	}
 	err := sheet.SaveAs(outputFilename)
 	if err != nil {
 		log.Fatalf("Error saving excel file: %v", err)

@@ -40,8 +40,9 @@ type Country struct {
 // Config struct contains the overall configuration
 // Default country is optional
 type Config struct {
-	DefaultCountry string
-	Countries      []Country
+	DefaultCountry  string
+	OutputDirectory string
+	Countries       []Country
 }
 
 func readConfig(filename string) (Config, error) {

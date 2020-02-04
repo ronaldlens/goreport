@@ -27,6 +27,9 @@ func ImportIncidents(filename string) (Incidents, error) {
 
 	// get header line and build map to reference column numbers by the name
 	scanner.Scan()
+	//headerLine := scanner.Text()
+	//fmt.Println(headerLine)
+	//headerParts := strings.Split(headerLine, "\t")
 	headerParts := strings.Split(scanner.Text(), "\t")
 	headers, err := parseHeaders(headerParts)
 	if err != nil {
@@ -55,6 +58,9 @@ func ImportIncidents(filename string) (Incidents, error) {
 		if inc.ServiceCI == "Remedy USMS PROD Corp" {
 			inc.Service = "Service Assurance"
 		}
+
+		// parse corp/local flag
+		inc.FlagCorp = parts[headers["Flag corp/local"]] == "1"
 
 		// get timestamps, createdAt and solvedAt
 		// solvedAt may not be filled in (yet), if so, don't use it for SLA calculations

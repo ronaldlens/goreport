@@ -24,6 +24,7 @@ type Incident struct {
 	ProdCategory2     string
 	ServiceCI         string
 	BusinessArea      string
+	FlagCorp          bool
 	SLAReady          bool
 	SLAMet            bool
 	OpenTime          int
@@ -55,6 +56,25 @@ func (incidents *Incidents) filterOutProdCategories(categories []string) Inciden
 			if categoryMap[incident.ProdCategory2] != 1 {
 				result = append(result, incident)
 			}
+		}
+	}
+	return result
+}
+
+func (incidents *Incidents) filterCorpLocal(corp bool) Incidents {
+	var result []Incident
+
+	if flagVars.nofilter {
+		return *incidents
+	}
+
+	if flagVars.reverse {
+		corp = !corp
+	}
+
+	for _, incident := range *incidents {
+		if incident.FlagCorp == corp {
+			result = append(result, incident)
 		}
 	}
 	return result
@@ -335,11 +355,17 @@ func (incident *Incident) getOutageMinutesInMonth(month int, year int) int {
 		return 0
 	}
 
+	nextMonth, nextYear := getNextMonth(month, year)
+
 	// if incident is created in the previous month we need to do some math
 	if incident.isCreatedInPrevMonthYear(month, year) {
-
+		//TODO: only return minutes in this month
 	} else {
-
+		if incident.isResolvedInMonthYear(nextMonth, nextYear) {
+			//TODO: only return minutes in this month
+		} else {
+			return incident.OpenTime
+		}
 	}
 
 	//TODO: implement getOutageMinutesInMonth

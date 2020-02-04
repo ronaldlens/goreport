@@ -179,8 +179,8 @@ func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 	_ = xls.SetColWidth("Incidents", "I", "I", 0.9*float64(maxProdCat2Len))
 	_ = xls.SetColWidth("Incidents", "J", "J", 0.9*float64(maxSvcLen))
 	_ = xls.SetColWidth("Incidents", "K", "K", 0.9*float64(maxCILen))
-	_ = xls.SetColWidth("Incidents", "N", "M", 0.9*float64(maxDescLen))
-	_ = xls.SetColWidth("Incidents", "O", "N", 0.9*float64(maxResLen))
+	_ = xls.SetColWidth("Incidents", "N", "N", 0.9*float64(maxDescLen))
+	_ = xls.SetColWidth("Incidents", "O", "O", 0.9*float64(maxResLen))
 
 	rowStr := strconv.Itoa(len(incidents) + 1)
 	_ = xls.AutoFilter("Incidents", "A1", "M"+rowStr, "")

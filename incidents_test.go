@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"time"
 )
 
 func TestIncidents_filterOutProdCategories(t *testing.T) {
@@ -172,4 +173,25 @@ func Test_getPreviousMonth(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestIncident_getOutageMinutesInMonth(t *testing.T) {
+	startTime := time.Date(2019, time.April, 1, 0, 0, 0, 0, time.UTC)
+	resolvedTime := time.Date(2019, time.April, 1, 1, 30, 0, 0, time.UTC)
+
+	incident := Incident{CreatedAt: startTime, SolvedAt: resolvedTime, OpenTime: 90, SLAReady: true}
+
+	got := incident.getOutageMinutesInMonth(4, 2019)
+	if got != 90 {
+		t.Errorf("getOutageMinutesInMonth got %d, want %d", got, 90)
+	}
+
+	// incident starts in the month before
+	startTime = time.Date(2019, time.March, 31, 23, 0, 0, 0, time.UTC)
+	incident = Incident{CreatedAt: startTime, SolvedAt: resolvedTime, OpenTime: 90, SLAReady: true}
+	got = incident.getOutageMinutesInMonth(4, 2019)
+	if got != 90 {
+		t.Errorf("getOutageMinutesInMonth got %d, want %d", got, 90)
+	}
+
 }
