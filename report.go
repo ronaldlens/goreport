@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 )
 
-func runReport(incidents *Incidents, country string, month int, year int, splitArea bool,
+func runReport(incidents *Incidents, localIncidents *Incidents, country string, month int, year int, splitArea bool,
 	outputFilename string, minimumIncidents MinimumIncidents, verbose bool, outputDirectory string) {
 
 	if outputFilename == "" {
@@ -32,12 +32,13 @@ func runReport(incidents *Incidents, country string, month int, year int, splitA
 	} else {
 		sheet.setupOverviewSheet("")
 		totalIncidents = incidents.reportOnSixMonths(month, year, "", &sheet, minimumIncidents)
+
 		sheet.createCharts("")
 	}
 
 	sheet.addProdCategoriesToSheet(totalIncidents)
-	sheet.addIncidentsToSheet(totalIncidents)
-
+	sheet.addIncidentsToSheet(totalIncidents, "Incidents")
+	//sheet.addIncidentsToSheet(localIncidents, "Local Incidents")
 	if outputDirectory != "" {
 		outputFilename = filepath.Join(outputDirectory, outputFilename)
 

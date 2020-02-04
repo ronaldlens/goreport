@@ -111,9 +111,9 @@ func runReportCommand(incidents Incidents) {
 	// reduce incidents
 	countryConfig := getCountryFromConfig(config, flagVars.country)
 	incidents = incidents.filterByCountry(flagVars.country)
-	//incidents = incidents.filterOutProdCategories(countryConfig.FilterOutCategories)
+	//incidents = incidents.filterOutProdCategories2(countryConfig.FilterOutCategories)
 	//TODO: process local incidents
-	//localIncidents := incidents.filterCorpLocal(false)
+	localIncidents := incidents.filterCorpLocal(false)
 	incidents = incidents.filterCorpLocal(true)
 
 	// if we are to use a reference xlsx, process it
@@ -131,7 +131,7 @@ func runReportCommand(incidents Incidents) {
 
 	slaSet := ParseSLAConfig(countryConfig.SLAs)
 	incidents = checkIncidentsAgainstSLA(incidents, slaSet)
-	runReport(&incidents, flagVars.country, flagVars.month, flagVars.year, countryConfig.SplitArea,
+	runReport(&incidents, &localIncidents, flagVars.country, flagVars.month, flagVars.year, countryConfig.SplitArea,
 		flagVars.outputFilename, countryConfig.MinimumIncidents, flagVars.verbose, config.OutputDirectory)
 }
 

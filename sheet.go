@@ -95,30 +95,30 @@ func (sheet *Sheet) addProdCategoriesToSheet(incidents Incidents) {
 	_ = xls.SetColWidth("ProdCat", "A", "A", 0.9*float64(maxLen))
 }
 
-func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
+func (sheet *Sheet) addIncidentsToSheet(incidents []Incident, sheetName string) {
 	xls := sheet.file
-	xls.SetActiveSheet(xls.NewSheet("Incidents"))
+	xls.SetActiveSheet(xls.NewSheet(sheetName))
 	urlPrefix := "http://usms.upc.biz/arsys/forms/appusms/SHR%%3ALandingConsole/Default+Administrator+View/" +
 		"?mode=search&F304255500=HPD%%3AHelp+Desk&F1000000076=FormOpenNoAppList&F303647600=" +
 		"SearchTicketWithQual&F304255610='1000000161'%%3D%%22%s%%22"
 	urlStyle, _ := xls.NewStyle(`{"font":{"color":"#1265BE","underline":"single"}}`)
 
 	// setup the header row
-	_ = xls.SetCellStr("Incidents", "A1", "ID")
-	_ = xls.SetCellStr("Incidents", "B1", "Created")
-	_ = xls.SetCellStr("Incidents", "C1", "Solved")
-	_ = xls.SetCellStr("Incidents", "D1", "Time Open")
-	_ = xls.SetCellStr("Incidents", "E1", "Corrected Open")
-	_ = xls.SetCellStr("Incidents", "F1", "Exclude")
-	_ = xls.SetCellStr("Incidents", "G1", "Priority")
-	_ = xls.SetCellStr("Incidents", "H1", "Product Category Tier 1")
-	_ = xls.SetCellStr("Incidents", "I1", "Product Category Tier 2")
-	_ = xls.SetCellStr("Incidents", "J1", "Service")
-	_ = xls.SetCellStr("Incidents", "K1", "Service CI")
-	_ = xls.SetCellStr("Incidents", "L1", "Business Area")
-	_ = xls.SetCellStr("Incidents", "M1", "SLA Met")
-	_ = xls.SetCellStr("Incidents", "N1", "Description")
-	_ = xls.SetCellStr("Incidents", "O1", "Resolution")
+	_ = xls.SetCellStr(sheetName, "A1", "ID")
+	_ = xls.SetCellStr(sheetName, "B1", "Created")
+	_ = xls.SetCellStr(sheetName, "C1", "Solved")
+	_ = xls.SetCellStr(sheetName, "D1", "Time Open")
+	_ = xls.SetCellStr(sheetName, "E1", "Corrected Open")
+	_ = xls.SetCellStr(sheetName, "F1", "Exclude")
+	_ = xls.SetCellStr(sheetName, "G1", "Priority")
+	_ = xls.SetCellStr(sheetName, "H1", "Product Category Tier 1")
+	_ = xls.SetCellStr(sheetName, "I1", "Product Category Tier 2")
+	_ = xls.SetCellStr(sheetName, "J1", "Service")
+	_ = xls.SetCellStr(sheetName, "K1", "Service CI")
+	_ = xls.SetCellStr(sheetName, "L1", "Business Area")
+	_ = xls.SetCellStr(sheetName, "M1", "SLA Met")
+	_ = xls.SetCellStr(sheetName, "N1", "Description")
+	_ = xls.SetCellStr(sheetName, "O1", "Resolution")
 
 	maxProdCat1Len := 1
 	maxProdCat2Len := 1
@@ -130,27 +130,27 @@ func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 	for row, incident := range incidents {
 		rowStr := strconv.Itoa(row + 2)
 
-		_ = xls.SetCellValue("Incidents", "A"+rowStr, incident.ID)
+		_ = xls.SetCellValue(sheetName, "A"+rowStr, incident.ID)
 		url := fmt.Sprintf(urlPrefix, incident.ID)
-		_ = xls.SetCellHyperLink("Incidents", "A"+rowStr, url, "External")
-		_ = xls.SetCellStyle("Incidents", "A"+rowStr, "A"+rowStr, urlStyle)
+		_ = xls.SetCellHyperLink(sheetName, "A"+rowStr, url, "External")
+		_ = xls.SetCellStyle(sheetName, "A"+rowStr, "A"+rowStr, urlStyle)
 
-		_ = xls.SetCellValue("Incidents", "B"+rowStr, incident.CreatedAt)
+		_ = xls.SetCellValue(sheetName, "B"+rowStr, incident.CreatedAt)
 		if incident.SLAReady {
-			_ = xls.SetCellValue("Incidents", "C"+rowStr, incident.SolvedAt)
+			_ = xls.SetCellValue(sheetName, "C"+rowStr, incident.SolvedAt)
 		}
-		_ = xls.SetCellValue("Incidents", "D"+rowStr, incident.OpenTime)
-		_ = xls.SetCellValue("Incidents", "E"+rowStr, incident.CorrectedTime)
-		_ = xls.SetCellValue("Incidents", "F"+rowStr, incident.Exclude)
-		_ = xls.SetCellValue("Incidents", "G"+rowStr, PriorityNames[incident.Priority])
-		_ = xls.SetCellValue("Incidents", "H"+rowStr, incident.ProdCategory1)
-		_ = xls.SetCellValue("Incidents", "I"+rowStr, incident.ProdCategory2)
-		_ = xls.SetCellValue("Incidents", "J"+rowStr, incident.Service)
-		_ = xls.SetCellValue("Incidents", "K"+rowStr, incident.ServiceCI)
-		_ = xls.SetCellValue("Incidents", "L"+rowStr, incident.BusinessArea)
-		_ = xls.SetCellValue("Incidents", "M"+rowStr, incident.SLAMet)
-		_ = xls.SetCellValue("Incidents", "N"+rowStr, incident.Description)
-		_ = xls.SetCellValue("Incidents", "O"+rowStr, incident.Resolution)
+		_ = xls.SetCellValue(sheetName, "D"+rowStr, incident.OpenTime)
+		_ = xls.SetCellValue(sheetName, "E"+rowStr, incident.CorrectedTime)
+		_ = xls.SetCellValue(sheetName, "F"+rowStr, incident.Exclude)
+		_ = xls.SetCellValue(sheetName, "G"+rowStr, PriorityNames[incident.Priority])
+		_ = xls.SetCellValue(sheetName, "H"+rowStr, incident.ProdCategory1)
+		_ = xls.SetCellValue(sheetName, "I"+rowStr, incident.ProdCategory2)
+		_ = xls.SetCellValue(sheetName, "J"+rowStr, incident.Service)
+		_ = xls.SetCellValue(sheetName, "K"+rowStr, incident.ServiceCI)
+		_ = xls.SetCellValue(sheetName, "L"+rowStr, incident.BusinessArea)
+		_ = xls.SetCellValue(sheetName, "M"+rowStr, incident.SLAMet)
+		_ = xls.SetCellValue(sheetName, "N"+rowStr, incident.Description)
+		_ = xls.SetCellValue(sheetName, "O"+rowStr, incident.Resolution)
 
 		if len(incident.ProdCategory1) > maxProdCat1Len {
 			maxProdCat1Len = len(incident.ProdCategory1)
@@ -172,18 +172,18 @@ func (sheet *Sheet) addIncidentsToSheet(incidents []Incident) {
 		}
 	}
 
-	_ = xls.SetColWidth("Incidents", "A", "A", 16.0)
-	_ = xls.SetColWidth("Incidents", "B", "B", 16.0)
-	_ = xls.SetColWidth("Incidents", "C", "C", 16.0)
-	_ = xls.SetColWidth("Incidents", "H", "H", 0.9*float64(maxProdCat1Len))
-	_ = xls.SetColWidth("Incidents", "I", "I", 0.9*float64(maxProdCat2Len))
-	_ = xls.SetColWidth("Incidents", "J", "J", 0.9*float64(maxSvcLen))
-	_ = xls.SetColWidth("Incidents", "K", "K", 0.9*float64(maxCILen))
-	_ = xls.SetColWidth("Incidents", "N", "N", 0.9*float64(maxDescLen))
-	_ = xls.SetColWidth("Incidents", "O", "O", 0.9*float64(maxResLen))
+	_ = xls.SetColWidth(sheetName, "A", "A", 16.0)
+	_ = xls.SetColWidth(sheetName, "B", "B", 16.0)
+	_ = xls.SetColWidth(sheetName, "C", "C", 16.0)
+	_ = xls.SetColWidth(sheetName, "H", "H", 0.9*float64(maxProdCat1Len))
+	_ = xls.SetColWidth(sheetName, "I", "I", 0.9*float64(maxProdCat2Len))
+	_ = xls.SetColWidth(sheetName, "J", "J", 0.9*float64(maxSvcLen))
+	_ = xls.SetColWidth(sheetName, "K", "K", 0.9*float64(maxCILen))
+	_ = xls.SetColWidth(sheetName, "N", "N", 0.9*float64(maxDescLen))
+	_ = xls.SetColWidth(sheetName, "O", "O", 0.9*float64(maxResLen))
 
 	rowStr := strconv.Itoa(len(incidents) + 1)
-	_ = xls.AutoFilter("Incidents", "A1", "M"+rowStr, "")
+	_ = xls.AutoFilter(sheetName, "A1", "M"+rowStr, "")
 }
 
 func (sheet *Sheet) createCharts(area string) {

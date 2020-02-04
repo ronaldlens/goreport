@@ -9,7 +9,6 @@ import (
 // Incidents type contains and array of Incident
 type Incidents []Incident
 
-//TODO: add product category 1
 // Incident struct described an incident
 type Incident struct {
 	Country           string
@@ -34,7 +33,7 @@ type Incident struct {
 	Exclude           bool
 }
 
-func (incidents *Incidents) filterOutProdCategories(categories []string) Incidents {
+func (incidents *Incidents) filterOutProdCategories2(categories []string) Incidents {
 	var result []Incident
 
 	// return unfiltered list if the argument nofilter was supplied

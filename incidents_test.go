@@ -13,7 +13,7 @@ func TestIncidents_filterOutProdCategories(t *testing.T) {
 	incidents := Incidents{i1, i2, i3}
 	prodCategories := []string{"bar"}
 
-	filtered := incidents.filterOutProdCategories(prodCategories)
+	filtered := incidents.filterOutProdCategories2(prodCategories)
 	if len(filtered) != 2 {
 		t.Errorf("Exepcted length of 2, got %d", len(filtered))
 	}
